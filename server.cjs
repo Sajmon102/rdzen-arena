@@ -262,7 +262,7 @@ const timer = setInterval(() => {
     lastPing = now;
     for (const [address, limit] of joinLimits) if (now - limit.start > 60000) joinLimits.delete(address);
   }
-}, 50);
+}, 40);
 
 server.on('error', error => {
   console.error(error.code === 'EADDRINUSE' ? `Port ${PORT} jest zajęty. Zamknij drugi serwer lub ustaw zmienną PORT.` : error.message);
