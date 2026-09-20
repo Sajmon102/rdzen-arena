@@ -155,7 +155,7 @@ const server = http.createServer(async (req, res) => {
       let room = rooms.get(roomName);
       if (!room) {
         if (rooms.size >= MAX_ROOMS) return json(res, 503, { error: 'Serwer ma już maksymalną liczbę pokoi.' });
-        room = { name: roomName, world: Engine.createWorld({ bots: 6, seed: crypto.randomInt(1, 2147483647) }), members: new Set() };
+        room = { name: roomName, world: Engine.createWorld({ bots: 6, difficulty: 'normal', seed: crypto.randomInt(1, 2147483647) }), members: new Set() };
         rooms.set(roomName, room);
       }
       if (room.members.size >= MAX_PLAYERS) return json(res, 409, { error: 'Ten pokój jest pełny (12 graczy).' });
@@ -262,7 +262,7 @@ const timer = setInterval(() => {
     lastPing = now;
     for (const [address, limit] of joinLimits) if (now - limit.start > 60000) joinLimits.delete(address);
   }
-}, 50);
+}, 40);
 
 server.on('error', error => {
   console.error(error.code === 'EADDRINUSE' ? `Port ${PORT} jest zajęty. Zamknij drugi serwer lub ustaw zmienną PORT.` : error.message);
