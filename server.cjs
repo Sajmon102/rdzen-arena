@@ -211,7 +211,9 @@ const server = http.createServer(async (req, res) => {
         session.lastInput = performance.now();
         session.inputIdle = false;
       } else if (data.type === 'upgrade' && typeof data.stat === 'string' && data.stat.length < 40) {
-        Engine.upgrade(session.room.world, session.id, data.stat);
+        if (data.target !== undefined && (!Number.isInteger(data.target) || data.target < 1 || data.target > Engine.config.statCap)) return json(res, 400, { error: 'Nieprawidłowy poziom ulepszenia.' });
+        const upgraded = Engine.upgrade(session.room.world, session.id, data.stat, data.target);
+        return json(res, 200, { ok: upgraded });
       } else if (data.type === 'class' && typeof data.classId === 'string' && data.classId.length < 40) {
         Engine.chooseClass(session.room.world, session.id, data.classId);
       } else if (data.type === 'respawn') {
@@ -272,7 +274,9 @@ server.on('error', error => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log('\nRDZEŃ — serwer multiplayer działa.');
   console.log(`Na tym komputerze: http://localhost:${PORT}`);
-  for (const interfaces of Object.values(os.networkInterfaces())) {
+  let localInterfaces = {};
+  try { localInterfaces = os.networkInterfaces(); } catch { /* Some hosts do not expose LAN addresses. */ }
+  for (const interfaces of Object.values(localInterfaces)) {
     for (const network of interfaces || []) {
       if (network.family === 'IPv4' && !network.internal) console.log(`W tej samej sieci: http://${network.address}:${PORT}`);
     }

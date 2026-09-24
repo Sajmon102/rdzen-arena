@@ -61,15 +61,35 @@ html,body{width:100%;height:100%;overscroll-behavior:none}
  .hud-header .brand{font-size:14px}.hud-header .brand-icon{width:24px;height:25px}
  .modal{max-height:94dvh}
 }
+
+/* Large, individually selectable upgrade steps also work with a thumb. */
+.upgrades{width:280px;max-width:calc(100vw - 28px)}
+.stat.stat-row{display:block;cursor:default;background:#152531;margin-top:7px;padding:7px;border-radius:8px}
+.stat-top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:5px}
+.stat-level{font-size:11px;color:var(--stat-color);white-space:nowrap}
+.stat-bars{gap:3px;margin:0}.stat-step{flex:1;min-width:0;height:26px;padding:0;border-radius:4px;font-size:10px;background:#263d4a;color:#bdcdd5;touch-action:manipulation}
+.stat-step.affordable{border-color:var(--stat-color)}.stat-step.filled{background:var(--stat-color);color:#10232b;opacity:1}
+.stat-actions{display:flex;gap:5px;margin-top:4px}.stat-actions button{flex:1;padding:4px;font-size:11px;color:var(--stat-color);touch-action:manipulation}
+.upgrade-help{font-size:11px;line-height:1.5;color:var(--muted);margin:8px 0}
+#upgrades{max-height:calc(100dvh - 145px);overflow:auto}
+@media(pointer:coarse){.stat-step{height:32px}.stat-actions button{min-height:30px}.upgrades{width:280px}}
+.stat-row[data-preview="1"] .stat-step:nth-child(-n+1):not(.filled){background:var(--stat-color);color:#10232b}
+.stat-row[data-preview="2"] .stat-step:nth-child(-n+2):not(.filled){background:var(--stat-color);color:#10232b}
+.stat-row[data-preview="3"] .stat-step:nth-child(-n+3):not(.filled){background:var(--stat-color);color:#10232b}
+.stat-row[data-preview="4"] .stat-step:nth-child(-n+4):not(.filled){background:var(--stat-color);color:#10232b}
+.stat-row[data-preview="5"] .stat-step:nth-child(-n+5):not(.filled){background:var(--stat-color);color:#10232b}
+.stat-row[data-preview="6"] .stat-step:nth-child(-n+6):not(.filled){background:var(--stat-color);color:#10232b}
+.stat-row[data-preview="7"] .stat-step:nth-child(-n+7):not(.filled){background:var(--stat-color);color:#10232b}
+.stat-row[data-preview="8"] .stat-step:nth-child(-n+8):not(.filled){background:var(--stat-color);color:#10232b}
 </style>
 </head>
 <body>
 <canvas id="arena" aria-label="Arena czołgów RDZEŃ"></canvas><div id="vignette"></div>
 <main id="menu">
  <section class="lobby panel" aria-label="Rozpocznij grę">
-  <div class="version"><span class="eyebrow">TANK ARENA</span><span class="pill">VOL. 02</span></div>
+  <div class="version"><span class="eyebrow">TANK ARENA</span><span class="pill">VOL. 03 · TEST</span></div>
   <h1>RDZEŃ<span style="color:var(--mint)">.</span></h1>
-  <p class="intro">Destroy shapes. Upgrade your tank.<br>Capture the arena core.</p>
+  <p style="color:#ffc76a;font-size:12px">WERSJA ROBOCZA: zdrowie, obrażenia i szanse figur nie są jeszcze zgodne 1:1 z Arras FFA.</p><p class="intro">Destroy shapes. Upgrade your tank.<br>Capture the arena core.</p>
   <label for="nickname">Your name</label><input id="nickname" maxlength="18" placeholder="Pilot" autocomplete="off" spellcheck="false" value="Pilot">
   <div class="modes" aria-label="Game mode"><button class="mode selected" data-mode="solo" aria-pressed="true">Solo + Bots</button><button class="mode" data-mode="local" aria-pressed="false">2 Players</button><button class="mode" data-mode="online" aria-pressed="false">Online</button></div>
   <div id="difficultyFields"><label>Solo difficulty</label><div class="difficulties" aria-label="Enemy difficulty"><button class="difficulty" data-difficulty="easy" aria-pressed="false">Easy</button><button class="difficulty selected" data-difficulty="normal" aria-pressed="true">Normal</button><button class="difficulty" data-difficulty="hard" aria-pressed="false">Hard</button></div></div>
@@ -90,7 +110,7 @@ html,body{width:100%;height:100%;overscroll-behavior:none}
  <div class="feed" id="feed"></div>
  <div id="toast" class="toast" role="status"></div>
  <button id="mobileUpgrade" aria-controls="upgrades" aria-expanded="false">Upgrades <span id="mobilePoints">0</span></button>
- <section id="upgrades" class="upgrades panel interactive"><div class="upgrades-heading" tabindex="0" aria-label="Stat upgrades — najedź lub wybierz klawiaturą, aby rozwinąć"><span class="section-label">STAT UPGRADES</span><span id="points" class="point-badge">0 pkt</span></div><div id="statButtons"></div></section>
+ <section id="upgrades" class="upgrades panel interactive"><div class="upgrades-heading" tabindex="0" aria-label="Stat upgrades — najedź lub wybierz klawiaturą, aby rozwinąć"><span class="section-label">STAT UPGRADES</span><span id="points" class="point-badge">0 pkt</span></div><div id="statButtons"><p class="upgrade-help">Kliknij numer poziomu lub MAX. Wydajesz tylko posiadane punkty; ulepszeń nie można cofnąć.</p></div></section>
  <aside id="coreTutorial" class="core-tutorial panel"><b>CORE TUTORIAL</b><ol><li>Find the glowing active relay.</li><li>Stay inside its ring for 2 seconds.</li><li>When charged, press <strong>F</strong> for Overdrive.</li></ol><button id="closeTutorial">Got it</button></aside>
  <section class="player-hud panel"><div class="player-title"><b id="className">Basic</b><span id="playerLevel">LEVEL 1</span></div><div id="xpText" class="xp-status">NEXT LEVEL: 0 / 100 XP</div><div class="progress-meta"><span id="nextTankText">NEXT TANK: LEVEL 15</span><span id="scoreText">SCORE: 0</span></div><div class="arras-score"><span id="scoreBarText">Score: 0</span></div><div class="arras-level"><div id="xpFill" class="level-fill"></div><b id="levelClassText">Level 1 Basic</b></div><div class="abilities"><button id="dashButton" class="ability ready"><kbd>SPACE</kbd><span id="dashText">Dash</span></button><button id="boostButton" class="ability"><kbd>F</kbd><span id="boostText">Overdrive</span></button></div><button id="evolveButton" class="ability hidden" style="margin-top:6px;width:100%;color:var(--gold)">Upgrade tank ↗</button></section>
  <div class="hint-line">WASD — move &nbsp;·&nbsp; mouse — aim &nbsp;·&nbsp; LMB — fire &nbsp;·&nbsp; E — autofire &nbsp;·&nbsp; F — Overdrive</div>
@@ -100,7 +120,7 @@ html,body{width:100%;height:100%;overscroll-behavior:none}
  <div id="localInfo" class="local-info panel hidden"><b id="p2Stats">Player 2</b><p>Enter — fire · Shift — dash · P — Overdrive<br>Automatic aim, stats and evolution.</p><button id="p2Respawn" class="hidden">Respawn Player 2</button></div>
  <div id="movePad" class="touch-zone" aria-label="Przeciągnij, aby jechać"><span>RUCH</span></div><div id="aimPad" class="touch-zone" aria-label="Przeciągnij, aby celować i strzelać"><span>CEL / OGIEŃ</span></div>
 </div>
-<div id="helpModal" class="modal-wrap hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><section class="modal panel"><h2 id="helpTitle">Know your tank.</h2><p>Destroy shapes and enemy tanks to earn XP. Touching a shape damages both your tank and the shape. Every level grants one stat point. At levels 15 and 30 you can choose a new class or stay with the current one.</p><div class="control-row">Move / aim<span>WASD / mouse</span></div><div class="control-row">Fire / autofire<span>LMB / E</span></div><div class="control-row">Dash / Overdrive<span>Space / F</span></div><div class="control-row">Upgrade stats<span>Keys 1–8</span></div><div class="control-row">Menu / sound<span>Esc / M</span></div><div class="tank-tree"><b>TANK EVOLUTIONS</b><span>Basic → Twin → Triplet</span><span>Basic → Sniper → Railgun</span><span>Basic → Heavy → Fortress</span><small>Tier 2: level 15 · Tier 3: level 30 · Max: level 45</small></div><p><b style="color:var(--mint)">Core tutorial:</b> find the glowing active relay, stay inside its ring for 2 seconds, then press F when charged. Overdrive grants 4 seconds of faster movement and fire.</p><p><b style="color:var(--gold)">Two players:</b> Player 2 uses arrows, Enter to fire, Shift to dash and P for Overdrive. Aim, stats and evolution are automatic.</p><p>Bots carry a BOT tag. Online multiplayer needs the included server. Solo and local modes work without installation.</p><div class="modal-footer"><button id="closeHelp" class="primary">Got it</button></div></section></div>
+<div id="helpModal" class="modal-wrap hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><section class="modal panel"><h2 id="helpTitle">Know your tank.</h2><p>Destroy shapes and enemy tanks to earn XP. Touching a shape damages both your tank and the shape. Every level grants one stat point. Click a numbered stat segment to buy up to that level, or MAX to spend available points on one stat. Upgrades are permanent. Blue pentagons come in normal, Beta and Alpha variants. Explore the purple central nest for better XP and watch out for pink Crashers. Rare green Shiny shapes grant bonus XP. At levels 15 and 30 you can choose a new class or stay with the current one.</p><div class="control-row">Move / aim<span>WASD / mouse</span></div><div class="control-row">Fire / autofire<span>LMB / E</span></div><div class="control-row">Dash / Overdrive<span>Space / F</span></div><div class="control-row">Upgrade stats<span>1–8 · Shift + 1–8 = MAX</span></div><div class="control-row">Menu / sound<span>Esc / M</span></div><div class="tank-tree"><b>TANK EVOLUTIONS</b><span>Basic → Twin → Triplet</span><span>Basic → Sniper → Railgun</span><span>Basic → Heavy → Fortress</span><small>Tier 2: level 15 · Tier 3: level 30 · Max: level 45</small></div><p><b style="color:var(--mint)">Core tutorial:</b> find the glowing active relay, stay inside its ring for 2 seconds, then press F when charged. Overdrive grants 4 seconds of faster movement and fire.</p><p><b style="color:var(--gold)">Two players:</b> Player 2 uses arrows, Enter to fire, Shift to dash and P for Overdrive. Aim, stats and evolution are automatic.</p><p>Bots carry a BOT tag. Online multiplayer needs the included server. Solo and local modes work without installation.</p><div class="modal-footer"><button id="closeHelp" class="primary">Got it</button></div></section></div>
 <div id="pauseModal" class="modal-wrap hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><section class="modal panel"><span class="eyebrow">RDZEŃ / MENU</span><h2 id="pauseTitle" style="margin-top:10px">Take a breath.</h2><p id="pauseDescription">Game paused.</p><div class="modal-footer"><button id="resumeButton" class="primary">Resume</button><button id="quitButton">Main menu</button></div></section></div>
 <div id="deathModal" class="modal-wrap hidden" role="dialog" aria-modal="true" aria-labelledby="deathTitle"><section class="modal panel"><span class="eyebrow">TANK DESTROYED</span><h2 id="deathTitle" style="margin-top:12px">One more round?</h2><div class="death-number" id="finalScore">0</div><span class="muted" style="font-size:13px">score earned in this run</span><div class="death-grid"><div><small>LEVEL REACHED</small><b id="finalLevel">1</b></div><div><small>TANK KILLS</small><b id="finalKills">0</b></div></div><p>You keep 25% of your score, up to 402,171. Your class and stat build reset, and retained score becomes levels with fresh upgrade points. Respawn score: <b id="respawnScore">0</b>.</p><div class="modal-footer"><button id="respawnButton" class="primary">Respawn</button><button id="deathQuit">Main menu</button></div></section></div>
 
@@ -158,10 +178,36 @@ html,body{width:100%;height:100%;overscroll-behavior:none}
     }
     return best;
   }
+  // Original Rdzeń balancing; polygon families inspired by Arras.
+  const nest={x:3000,y:2200,radius:860};
+  const shapeTypes={
+    square:{name:'Square',sides:4,radius:19,hp:20,color:'#ffe46b',value:20,rings:0},
+    triangle:{name:'Triangle',sides:3,radius:23,hp:60,color:'#f57b72',value:100,rings:0},
+    pentagon:{name:'Pentagon',sides:5,radius:31,hp:180,color:'#768cff',value:500,rings:0},
+    beta:{name:'Beta Pentagon',sides:5,radius:52,hp:900,color:'#768cff',value:2500,rings:1},
+    alpha:{name:'Alpha Pentagon',sides:5,radius:82,hp:3600,color:'#768cff',value:12500,rings:2},
+    hexagon:{name:'Hexagon',sides:6,radius:43,hp:480,color:'#72ddbf',value:1500,rings:0},
+    crasher:{name:'Crasher',sides:3,radius:19,hp:95,color:'#ed78b8',value:180,rings:0,hostile:true}
+  };
   function makeShape(w,existing) {
-    const pos=spawnPosition(w),roll=random(w);
-    const kind=roll<.65?{sides:4,radius:19,hp:1,color:'#ffe46b',value:20}:roll<.90?{sides:3,radius:23,hp:10,color:'#f57b72',value:100}:roll<.98?{sides:5,radius:31,hp:75,color:'#768cff',value:500}:{sides:6,radius:43,hp:200,color:'#72ddbf',value:2500};
-    const s=existing||{};Object.assign(s,{id:existing?existing.id:uid(w,'s'),x:pos.x,y:pos.y,radius:kind.radius,sides:kind.sides,hp:kind.hp,maxHp:kind.hp,color:kind.color,value:kind.value,angle:random(w)*Math.PI*2,_dead:false,_respawn:0});return s;
+    const inNest=existing?existing._nest:w.shapes.length<58,slot=w.shapes.length,roll=random(w);
+    let type=inNest?(roll<.12?'alpha':roll<.40?'beta':roll<.68?'pentagon':roll<.78?'hexagon':'crasher'):(roll<.61?'square':roll<.88?'triangle':roll<.98?'pentagon':'hexagon');
+    if(!existing&&slot<3)type=['pentagon','beta','alpha'][slot];
+    const kind=shapeTypes[type],shiny=!kind.hostile&&random(w)<.003;
+    let pos=null;
+    for(let tries=0;tries<350;tries++){
+      const a=random(w)*Math.PI*2,r=Math.sqrt(random(w))*(nest.radius-kind.radius);
+      const candidate=inNest?{x:nest.x+Math.cos(a)*r,y:nest.y+Math.sin(a)*r}:{x:90+random(w)*(config.width-180),y:90+random(w)*(config.height-180)};
+      if(!inNest&&hypot(candidate.x-nest.x,candidate.y-nest.y)<nest.radius+kind.radius)continue;
+      if(!free(w,candidate.x,candidate.y,kind.radius))continue;
+      if(w.players.some(p=>!p.dead&&hypot(p.x-candidate.x,p.y-candidate.y)<p.radius+kind.radius+90))continue;
+      if(w.shapes.some(s=>s!==existing&&!s._dead&&hypot(s.x-candidate.x,s.y-candidate.y)<s.radius+kind.radius+12))continue;
+      pos=candidate;break;
+    }
+    // Keep a dead slot pending instead of spawning inside a wall or another entity.
+    if(!pos){if(existing){existing._respawn=1;return existing;}return null;}
+    const hp=kind.hp*(shiny?3:1),s=existing||{};
+    Object.assign(s,{id:existing?existing.id:uid(w,'s'),type,name:(shiny?'Shiny ':'')+kind.name,x:pos.x,y:pos.y,radius:kind.radius,sides:kind.sides,hp,maxHp:hp,color:shiny?'#83f58b':kind.color,value:kind.value*(shiny?5:1),rings:kind.rings,hostile:!!kind.hostile,shiny,angle:random(w)*Math.PI*2,_nest:inNest,_dead:false,_respawn:0});return s;
   }
   function createWorld(options={}) {
     const difficulty=['easy','normal','hard'].includes(options.difficulty)?options.difficulty:'hard';
@@ -172,7 +218,7 @@ html,body{width:100%;height:100%;overscroll-behavior:none}
       {x:430,y:3180,w:180,h:180},{x:1120,y:2860,w:200,h:200},{x:1780,y:3320,w:170,h:170},{x:2520,y:2980,w:210,h:210},{x:3260,y:3420,w:180,h:180},{x:4010,y:2940,w:200,h:200},{x:4720,y:3370,w:170,h:170},{x:5450,y:3010,w:210,h:210},
       {x:920,y:3880,w:170,h:170},{x:2230,y:3820,w:200,h:200},{x:3690,y:3890,w:180,h:180},{x:4970,y:3820,w:200,h:200}
     ],relays:[{id:'r1',x:1180,y:1880,radius:120,active:true},{id:'r2',x:3180,y:780,radius:120,active:false},{id:'r3',x:4920,y:1750,radius:120,active:false},{id:'r4',x:4490,y:3550,radius:120,active:false},{id:'r5',x:1880,y:3600,radius:120,active:false}],events:[],relaySwitchIn:35,_seed:(finite(options.seed,123)>>>0)||123,_seq:0,_relayIndex:0};
-    for(let i=0;i<210;i++)w.shapes.push(makeShape(w));
+    for(let i=0;i<210;i++){const shape=makeShape(w);if(shape)w.shapes.push(shape);}
     const names=['Astra','Kobalt','Echo','Pixel','Neon','Raptor','Błysk','Mira','Hex','Orion'];
     for(let i=0;i<clamp(Math.floor(finite(options.bots,6)),0,16);i++)join(w,{id:'bot'+i,name:names[i%names.length],bot:true});
     return w;
@@ -193,9 +239,16 @@ html,body{width:100%;height:100%;overscroll-behavior:none}
     const x=clamp(finite(v.x),-1,1),y=clamp(finite(v.y),-1,1),length=hypot(x,y)||1;
     p._input={x:x/Math.max(1,length),y:y/Math.max(1,length),angle:finite(v.angle,p.angle)%(Math.PI*2),fire:!!v.fire,boost:!!v.boost,dash:!!v.dash};
   }
-  function upgrade(w,id,statId) {
-    const p=w.players.find(p=>p.id===id);if(!p||p.dead||!stats.some(s=>s.id===statId)||p.points<=0||p.stats[statId]>=config.statCap)return false;
-    p.stats[statId]++;p.points--;const d=derived(p);p.maxHp=d.hp;if(statId==='health')p.hp=Math.min(p.hp+24,p.maxHp);return true;
+  function upgrade(w,id,statId,target) {
+    const p=w.players.find(p=>p.id===id);
+    if(!p||p.dead||!stats.some(s=>s.id===statId)||p.points<=0)return false;
+    const current=p.stats[statId];
+    if(target!==undefined&&(!Number.isInteger(target)||target<1||target>config.statCap))return false;
+    const wanted=target===undefined?current+1:target;
+    const amount=Math.min(wanted-current,config.statCap-current,p.points);
+    if(amount<=0)return false;
+    p.stats[statId]+=amount;p.points-=amount;
+    const d=derived(p);p.maxHp=d.hp;if(statId==='health')p.hp=Math.min(p.hp+24*amount*(p.bot?(p._botStrength??1):1),p.maxHp);return true;
   }
   function chooseClass(w,id,classId) {
     const p=w.players.find(p=>p.id===id),c=byClass[classId];if(!p||p.dead||!c||c.parent!==p.classId||p.level<(c.tier===2?15:30))return false;
@@ -278,7 +331,7 @@ html,body{width:100%;height:100%;overscroll-behavior:none}
     // Solid bodies gently separate; shapes can be pushed, but cannot trap pilots.
     for(let a=0;a<w.players.length;a++){const p=w.players[a];if(p.dead)continue;for(let b=a+1;b<w.players.length;b++){const q=w.players[b];if(q.dead)continue;const dx=q.x-p.x,dy=q.y-p.y,d=hypot(dx,dy),min=p.radius+q.radius;if(d<min&&d>.01){if(p._bodyCooldown<=0&&q._bodyCooldown<=0){damagePlayer(w,p,derived(q).bodyDamage,q);damagePlayer(w,q,derived(p).bodyDamage,p);p._bodyCooldown=q._bodyCooldown=.38;}const push=(min-d)*.48;movePlayer(w,p,-dx/d*push,-dy/d*push);movePlayer(w,q,dx/d*push,dy/d*push);}}}
     // Shapes hurt on contact, as in classic arena tank games. Both bodies take damage.
-    for(const p of w.players){if(p.dead)continue;for(const s of w.shapes){if(s._dead)continue;const dx=p.x-s.x,dy=p.y-s.y,min=p.radius+s.radius;if(Math.abs(dx)>=min||Math.abs(dy)>=min)continue;const d=hypot(dx,dy);if(d<min&&d>.01){if(p._bodyCooldown<=0){damagePlayer(w,p,5+Math.round(s.radius*.22),null);s.hp-=derived(p).bodyDamage;if(s.hp<=0){s.hp=0;s._dead=true;s._respawn=4+random(w)*5;gain(w,p,s.value);emit(w,'xp',s.x,s.y,s.color,'+'+s.value);}else emit(w,'hit',s.x,s.y,s.color,'');p._bodyCooldown=.34;}const push=(min-d)*.72;movePlayer(w,p,dx/d*push,dy/d*push);}}}
+    for(const p of w.players){if(p.dead)continue;for(const s of w.shapes){if(s._dead)continue;const dx=p.x-s.x,dy=p.y-s.y,min=p.radius+s.radius;if(Math.abs(dx)>=min||Math.abs(dy)>=min)continue;const d=hypot(dx,dy);if(d<min&&d>.01){if(p._bodyCooldown<=0){damagePlayer(w,p,(5+Math.round(s.radius*.22))*(s.hostile?(w.difficulty==='easy'?.5:w.difficulty==='normal'?2/3:1):1),null);s.hp-=derived(p).bodyDamage;if(s.hp<=0){s.hp=0;s._dead=true;s._respawn=4+random(w)*5;gain(w,p,s.value);emit(w,'xp',s.x,s.y,s.color,'+'+s.value);}else emit(w,'hit',s.x,s.y,s.color,'');p._bodyCooldown=.34;}const push=(min-d)*.72;movePlayer(w,p,dx/d*push,dy/d*push);}}}
     for(const b of w.bullets){
       b.life-=dt;if(b.life<=0)continue;const dx=b.vx*dt,dy=b.vy*dt;let wallT=1.1;
       for(const wall of w.walls){const t=segmentRect(b.x,b.y,dx,dy,wall,b.radius);if(t!==null)wallT=Math.min(wallT,t);}
@@ -291,12 +344,17 @@ html,body{width:100%;height:100%;overscroll-behavior:none}
       if(b.life<=0)continue;if(wallT<=1){b.x+=dx*wallT;b.y+=dy*wallT;b.life=0;emit(w,'hit',b.x,b.y,'#75909f','');}else{b.x+=dx;b.y+=dy;}if(b.x<0||b.y<0||b.x>config.width||b.y>config.height)b.life=0;
     }
     w.bullets=w.bullets.filter(b=>b.life>0);
-    for(const s of w.shapes){if(s._dead){s._respawn-=dt;if(s._respawn<=0)makeShape(w,s);}else{s.angle+=dt*.16;}}
+    for(const s of w.shapes){if(s._dead){s._respawn-=dt;if(s._respawn<=0)makeShape(w,s);}else{
+      if(s.hostile){let target=null,best=520;for(const p of w.players){if(p.dead||p.shield>0)continue;const distance=hypot(p.x-s.x,p.y-s.y);if(distance<best&&hypot(p.x-nest.x,p.y-nest.y)<nest.radius+240&&visible(w,s,p)){target=p;best=distance;}}
+        const dx=(target?target.x:nest.x)-s.x,dy=(target?target.y:nest.y)-s.y,d=hypot(dx,dy);
+        if(d>8){s.angle=Math.atan2(dy,dx);const speed=target?140:48,nx=s.x+dx/d*speed*dt,ny=s.y+dy/d*speed*dt;if(free(w,nx,s.y,s.radius))s.x=nx;if(free(w,s.x,ny,s.radius))s.y=ny;}
+      }else{s.angle+=dt*.16;}
+    }}
   }
   function snapshot(w) {
-    return {time:w.time,relaySwitchIn:w.relaySwitchIn,players:w.players.map(p=>({id:p.id,name:p.name,x:p.x,y:p.y,angle:p.angle,hp:p.hp,maxHp:p.maxHp,level:p.level,xp:p.xp,nextXp:p.nextXp,score:p.score,respawnScore:p.respawnScore||0,kills:p.kills,deaths:p.deaths,points:p.points,classId:p.classId,stats:copyStats(p.stats),color:p.color,bot:p.bot,dead:p.dead,respawnIn:p.respawnIn,shield:p.shield,boostTime:p.boostTime,boostCharge:p.boostCharge,dashCooldown:p.dashCooldown,relayProgress:p.relayProgress,radius:p.radius})),bullets:w.bullets.map(b=>({id:b.id,ownerId:b.ownerId,x:b.x,y:b.y,vx:b.vx,vy:b.vy,radius:b.radius,color:b.color,life:b.life,pierce:b.pierce})),shapes:w.shapes.filter(s=>!s._dead).map(s=>({id:s.id,x:s.x,y:s.y,radius:s.radius,sides:s.sides,hp:s.hp,maxHp:s.maxHp,color:s.color,value:s.value,angle:s.angle})),walls:w.walls.map(b=>({...b})),relays:w.relays.map(r=>({...r})),events:w.events.map(e=>({...e}))};
+    return {time:w.time,relaySwitchIn:w.relaySwitchIn,players:w.players.map(p=>({id:p.id,name:p.name,x:p.x,y:p.y,angle:p.angle,hp:p.hp,maxHp:p.maxHp,level:p.level,xp:p.xp,nextXp:p.nextXp,score:p.score,respawnScore:p.respawnScore||0,kills:p.kills,deaths:p.deaths,points:p.points,classId:p.classId,stats:copyStats(p.stats),color:p.color,bot:p.bot,dead:p.dead,respawnIn:p.respawnIn,shield:p.shield,boostTime:p.boostTime,boostCharge:p.boostCharge,dashCooldown:p.dashCooldown,relayProgress:p.relayProgress,radius:p.radius})),bullets:w.bullets.map(b=>({id:b.id,ownerId:b.ownerId,x:b.x,y:b.y,vx:b.vx,vy:b.vy,radius:b.radius,color:b.color,life:b.life,pierce:b.pierce})),shapes:w.shapes.filter(s=>!s._dead).map(s=>({id:s.id,x:s.x,y:s.y,radius:s.radius,sides:s.sides,type:s.type,name:s.name,rings:s.rings,hostile:s.hostile,shiny:s.shiny,hp:s.hp,maxHp:s.maxHp,color:s.color,value:s.value,angle:s.angle})),walls:w.walls.map(b=>({...b})),relays:w.relays.map(r=>({...r})),events:w.events.map(e=>({...e}))};
   }
-  root.ArenaEngine={config,classes,stats,createWorld,join,remove,input,step,upgrade,chooseClass,respawn,snapshot};
+  root.ArenaEngine={config,classes,stats,nest,shapeTypes,createWorld,join,remove,input,step,upgrade,chooseClass,respawn,snapshot};
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 </script>
@@ -346,7 +404,7 @@ async function connect(name){let base=$('serverAddress').value.trim().replace(/\
  await new Promise((resolve,reject)=>{let ready=false;const timeout=setTimeout(()=>{if(!ready)reject(Error('Nie otrzymano stanu areny. Spróbuj ponownie.'));},8000);source.addEventListener('state',ev=>{if(epoch!==netEpoch)return;try{const state=JSON.parse(ev.data);if(!Array.isArray(state.players))return;world=state;lastNetUpdate=performance.now();if(net)net.errors=0;$('connectionBanner').classList.add('hidden');if(!ready){ready=true;clearTimeout(timeout);resolve();}}catch{}});source.onerror=()=>{if(epoch!==netEpoch)return;if(ready&&running){$('connectionBanner').textContent='Przerwano połączenie. Próba ponownego połączenia…';$('connectionBanner').classList.remove('hidden');}};});}
 function disconnect(){++netEpoch;if(net){const old=net;old.source?.close();fetch(old.base+'/action',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+old.token},body:JSON.stringify({type:'leave'}),keepalive:true}).catch(()=>{});net=null;}}
 async function send(path,body){if(!net)return null;const current=net;const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),4000);try{const r=await fetch(current.base+path,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+current.token},body:JSON.stringify(body),signal:controller.signal});if(!r.ok){if(r.status===401&&current===net){$('connectionBanner').textContent='Sesja wygasła. Wróć do menu i dołącz ponownie.';$('connectionBanner').classList.remove('hidden');}return null;}return await r.json().catch(()=>({ok:true}));}catch{return null;}finally{clearTimeout(timer);}}
-function action(type,value,id=myId){if(mode==='online'){const body={type};if(type==='upgrade')body.stat=value;if(type==='class')body.classId=value;return send('/action',body);}if(type==='upgrade')return E.upgrade(world,id,value);if(type==='class')return E.chooseClass(world,id,value);if(type==='respawn')return E.respawn(world,id);}
+function action(type,value,id=myId,target){if(mode==='online'){const body={type};if(type==='upgrade'){body.stat=value;if(target!==undefined)body.target=target;}if(type==='class')body.classId=value;return send('/action',body);}if(type==='upgrade')return E.upgrade(world,id,value,target);if(type==='class')return E.chooseClass(world,id,value);if(type==='respawn')return E.respawn(world,id);}
 function quit(){disconnect();running=false;paused=false;myId=null;p2Id=null;releaseInput();['hud','pauseModal','deathModal','classPicker','helpModal','coreTutorial'].forEach(id=>$(id).classList.add('hidden'));$('menu').classList.remove('hidden');document.body.classList.remove('local');world=E.createWorld({bots:7,difficulty:'normal',seed:1407});particles=[];floatTexts=[];seenEvents.clear();}
 $('quitButton').onclick=quit;$('deathQuit').onclick=quit;
 function pause(){if(!running)return;if(!$('pauseModal').classList.contains('hidden')){hideModal('pauseModal');paused=false;return;}if(isOverlay())return;paused=mode!=='online';$('pauseDescription').textContent=mode==='online'?'The online arena keeps running and your tank stays in play.':'Game paused.';showModal('pauseModal');}
@@ -358,9 +416,28 @@ $('mobileUpgrade').onclick=()=>{const open=$('upgrades').classList.toggle('mobil
 canvas.addEventListener('pointerdown',()=>{$('upgrades').classList.remove('mobile-open');$('mobileUpgrade').setAttribute('aria-expanded','false');});
 $('dashButton').onclick=()=>{nextDash=true;};$('boostButton').onclick=()=>{nextBoost=true;if(!player()?.boostCharge)toast('Stay inside the active relay to charge Overdrive.');};
 $('closeClasses').onclick=()=>{dismissedOffer=classOffer;$('classPicker').classList.add('hidden');};$('evolveButton').onclick=()=>{dismissedOffer='';offerClasses(player(),true);};
-statIds.forEach((id,i)=>{const b=document.createElement('button');b.className='stat';b.id='stat-'+id;b.innerHTML='<kbd>'+(i+1)+'</kbd><span><span class="stat-name">'+statNames[id]+'</span><span class="stat-bars">'+Array(E.config.statCap).fill('<i></i>').join('')+'</span></span><span class="stat-plus">+</span>';b.onclick=()=>{action('upgrade',id);tone(600,.035);};$('statButtons').append(b);});
+statIds.forEach((id,i)=>{
+ const row=document.createElement('div');row.className='stat stat-row';row.id='stat-'+id;
+ const header=document.createElement('div');header.className='stat-top';
+ const name=document.createElement('span');name.className='stat-name';name.textContent=(i+1)+' · '+statNames[id];
+ const level=document.createElement('span');level.className='stat-level';header.append(name,level);
+ const bars=document.createElement('div');bars.className='stat-bars';bars.setAttribute('role','group');bars.setAttribute('aria-label',statNames[id]);
+ for(let n=1;n<=E.config.statCap;n++){const b=document.createElement('button');b.className='stat-step';b.textContent=n;b.dataset.level=n;b.title='Ulepsz do '+n;b.onclick=()=>buyStat(id,n);b.onpointerenter=()=>row.dataset.preview=n;b.onpointerleave=()=>delete row.dataset.preview;b.onfocus=()=>row.dataset.preview=n;b.onblur=()=>delete row.dataset.preview;bars.append(b);}
+ const controls=document.createElement('div');controls.className='stat-actions';
+ const plus=document.createElement('button');plus.className='stat-add';plus.textContent='+1';plus.onclick=()=>buyStat(id,(player()?.stats[id]||0)+1);
+ const max=document.createElement('button');max.className='stat-max';max.textContent='MAX';max.title='Wydaj dostępne punkty na tę statystykę';max.onclick=()=>buyStat(id,E.config.statCap);controls.append(plus,max);
+ row.append(header,bars,controls);$('statButtons').append(row);
+});
+let upgradePending=false;
+async function buyStat(id,target){
+ const p=player();if(!p||p.dead||upgradePending)return;
+ const wanted=target-(p.stats[id]||0),amount=Math.min(wanted,p.points,E.config.statCap-(p.stats[id]||0));if(amount<=0)return;
+ upgradePending=true;
+ try{const result=await action('upgrade',id,myId,target);if(result===false||result===null||result?.ok===false){toast('Ulepszenie nie zostało kupione. Spróbuj ponownie.');return;}tone(600,.035);if(amount<wanted)toast('Wydano dostępne punkty. Kolejne zdobędziesz za poziomy.');}
+ finally{upgradePending=false;updateHud();}
+}
 function typing(){return /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);}
-addEventListener('keydown',event=>{if(typing())return;const k=event.code;if(running&&['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter','ShiftRight','ShiftLeft'].includes(k))event.preventDefault();if(k==='Escape'){if(!$('helpModal').classList.contains('hidden'))hideModal('helpModal');else pause();return;}if(k==='KeyM'&&!event.repeat){toggleSound();return;}if(!running||isOverlay())return;keys.add(k);if(event.repeat)return;if(k==='Space')nextDash=true;if(k==='KeyF')nextBoost=true;if(k==='ShiftLeft'||k==='ShiftRight')nextP2Dash=true;if(k==='KeyP')nextP2Boost=true;if(k==='KeyE'){autoFire=!autoFire;toast(autoFire?'Autofire enabled':'Autofire disabled');}const n=Number(event.key);if(n>=1&&n<=8)action('upgrade',statIds[n-1]);});
+addEventListener('keydown',event=>{if(typing())return;const k=event.code;if(running&&['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter','ShiftRight','ShiftLeft'].includes(k))event.preventDefault();if(k==='Escape'){if(!$('helpModal').classList.contains('hidden'))hideModal('helpModal');else pause();return;}if(k==='KeyM'&&!event.repeat){toggleSound();return;}if(!running||isOverlay())return;keys.add(k);if(event.repeat)return;if(k==='Space')nextDash=true;if(k==='KeyF')nextBoost=true;if(k==='ShiftLeft'||k==='ShiftRight')nextP2Dash=true;if(k==='KeyP')nextP2Boost=true;if(k==='KeyE'){autoFire=!autoFire;toast(autoFire?'Autofire enabled':'Autofire disabled');}const n=Number(event.key);if(n>=1&&n<=8)buyStat(statIds[n-1],event.shiftKey?E.config.statCap:(player()?.stats[statIds[n-1]]||0)+1);});
 addEventListener('keyup',e=>keys.delete(e.code));addEventListener('blur',releaseInput);document.addEventListener('visibilitychange',()=>{releaseInput();if(document.hidden&&running&&mode!=='online'&&!paused&&!isOverlay())pause();});
 canvas.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){pointer.x=e.clientX;pointer.y=e.clientY;}});canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button===0&&running&&!isOverlay())pointer.down=true;});addEventListener('pointerup',()=>pointer.down=false);canvas.addEventListener('contextmenu',e=>e.preventDefault());
 function setupPad(id,aim){
@@ -389,12 +466,13 @@ function tank(targetCtx,p,size=1){const cls=C[p.classId]||C.scout,color=p.color|
 }
 function drawViewport(vx,vy,vw,vh,camera,p){ctx.save();ctx.beginPath();ctx.rect(vx,vy,vw,vh);ctx.clip();const jitter=reduceMotion?0:screenShake;ctx.translate(vx+vw/2+(Math.random()-.5)*jitter,vy+vh/2+(Math.random()-.5)*jitter);const zoom=scale(vw,vh);ctx.scale(zoom,zoom);ctx.translate(-camera.x,-camera.y);const left=camera.x-vw/2/zoom,top=camera.y-vh/2/zoom,right=camera.x+vw/2/zoom,bottom=camera.y+vh/2/zoom;const visible=(x,y,r=80)=>x+r>left&&x-r<right&&y+r>top&&y-r<bottom;
  ctx.fillStyle='#111f2b';ctx.fillRect(left,top,right-left,bottom-top);ctx.fillStyle='#162632';ctx.fillRect(0,0,E.config.width,E.config.height);
+ ctx.beginPath();ctx.arc(E.nest.x,E.nest.y,E.nest.radius,0,Math.PI*2);ctx.fillStyle='#7368bb22';ctx.fill();ctx.strokeStyle='#9d92ee55';ctx.lineWidth=3;ctx.stroke();ctx.font='800 30px Segoe UI';ctx.textAlign='center';ctx.fillStyle='#b4a7ff88';ctx.fillText('GNIAZDO · BETA / ALPHA',E.nest.x,E.nest.y-E.nest.radius+60);
  ctx.lineWidth=1;ctx.strokeStyle='#21333f';ctx.beginPath();for(let x=Math.max(0,Math.floor(left/60)*60);x<=Math.min(E.config.width,right);x+=60){ctx.moveTo(x,Math.max(0,top));ctx.lineTo(x,Math.min(E.config.height,bottom));}for(let y=Math.max(0,Math.floor(top/60)*60);y<=Math.min(E.config.height,bottom);y+=60){ctx.moveTo(Math.max(0,left),y);ctx.lineTo(Math.min(E.config.width,right),y);}ctx.stroke();
  ctx.strokeStyle='#45616b';ctx.lineWidth=7;ctx.strokeRect(0,0,E.config.width,E.config.height);ctx.strokeStyle='#2b414c';ctx.lineWidth=1;ctx.strokeRect(14,14,E.config.width-28,E.config.height-28);
  ctx.save();ctx.translate(E.config.width/2,E.config.height/2);ctx.strokeStyle='#28434c';ctx.lineWidth=2;ctx.setLineDash([8,15]);ctx.beginPath();ctx.arc(0,0,330,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.rotate(-Math.PI/6);ctx.font='800 80px Segoe UI';ctx.textAlign='center';ctx.fillStyle='#25404a55';ctx.fillText('CORE',0,25);ctx.restore();
  for(const r of world.relays){if(!visible(r.x,r.y,200))continue;const radius=r.radius||115;ctx.save();ctx.translate(r.x,r.y);ctx.fillStyle=r.active?'#8bf4cf12':'#172832';ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);ctx.fill();ctx.strokeStyle=r.active?'#86edc697':'#38505a';ctx.lineWidth=2;ctx.setLineDash(r.active?[]:[6,10]);ctx.stroke();ctx.setLineDash([]);ctx.save();ctx.rotate(renderClock*(r.active?.25:.035));polygon(0,0,43,6,Math.PI/6);ctx.fillStyle='#203b42';ctx.fill();ctx.strokeStyle=r.active?'#8bf4cf':'#47616b';ctx.lineWidth=3;ctx.stroke();ctx.restore();polygon(0,0,17,4,Math.PI/4);ctx.fillStyle=r.active?'#afffd8':'#4c626c';ctx.fill();ctx.font='700 11px Segoe UI';ctx.textAlign='center';ctx.fillStyle=r.active?'#a9edcf':'#58737d';ctx.fillText('RELAY '+String(world.relays.indexOf(r)+1).padStart(2,'0'),0,radius+21);ctx.restore();}
  for(const wall of world.walls){if(!visible(wall.x+wall.w/2,wall.y+wall.h/2,Math.max(wall.w,wall.h)))continue;ctx.fillStyle='#07162085';rounded(wall.x+5,wall.y+7,wall.w,wall.h,7);ctx.fill();ctx.fillStyle='#273b46';ctx.strokeStyle='#4a626d';ctx.lineWidth=2;rounded(wall.x,wall.y,wall.w,wall.h,5);ctx.fill();ctx.stroke();ctx.strokeStyle='#607a842e';ctx.beginPath();ctx.moveTo(wall.x+8,wall.y+8);ctx.lineTo(wall.x+wall.w-8,wall.y+8);ctx.stroke();}
- for(const s of world.shapes){if(!visible(s.x,s.y,65)||s.hp<=0)continue;const radius=s.radius||18,sides=s.sides||4,angle=s.angle||0;polygon(s.x+4,s.y+6,radius,sides,angle);ctx.fillStyle='#06101a55';ctx.fill();polygon(s.x,s.y,radius,sides,angle);ctx.fillStyle=s.color||'#f5cf55';ctx.strokeStyle='#59646b';ctx.lineWidth=3;ctx.fill();ctx.stroke();const rings=radius>=40?3:radius>=28?2:radius>=22?1:0;ctx.strokeStyle='#35434caa';ctx.lineWidth=2;for(let ring=1;ring<=rings;ring++){polygon(s.x,s.y,radius*(1-ring*.2),sides,angle);ctx.stroke();}if(rings){const inner=radius*(1-rings*.2);ctx.beginPath();for(let i=0;i<sides;i++){const a=angle+i*Math.PI*2/sides;ctx.moveTo(s.x+Math.cos(a)*radius*.94,s.y+Math.sin(a)*radius*.94);ctx.lineTo(s.x+Math.cos(a)*inner,s.y+Math.sin(a)*inner);}ctx.stroke();}if(s.hp<s.maxHp){ctx.fillStyle='#0d1722';ctx.fillRect(s.x-radius,s.y+radius+9,radius*2,4);ctx.fillStyle=s.color;ctx.fillRect(s.x-radius,s.y+radius+9,radius*2*Math.max(0,s.hp/s.maxHp),4);}}
+ for(const s of world.shapes){if(!visible(s.x,s.y,(s.radius||65)+30)||s.hp<=0)continue;const radius=s.radius||18,sides=s.sides||4,angle=s.angle||0;polygon(s.x+4,s.y+6,radius,sides,angle);ctx.fillStyle='#06101a55';ctx.fill();polygon(s.x,s.y,radius,sides,angle);ctx.fillStyle=s.color||'#f5cf55';ctx.strokeStyle='#59646b';ctx.lineWidth=3;ctx.fill();ctx.stroke();const rings=s.rings||0;ctx.strokeStyle='#35434caa';ctx.lineWidth=2;for(let ring=1;ring<=rings;ring++){polygon(s.x,s.y,radius*(1-ring*.2),sides,angle);ctx.stroke();}if(rings){const inner=radius*(1-rings*.2);ctx.beginPath();for(let i=0;i<sides;i++){const a=angle+i*Math.PI*2/sides;ctx.moveTo(s.x+Math.cos(a)*radius*.94,s.y+Math.sin(a)*radius*.94);ctx.lineTo(s.x+Math.cos(a)*inner,s.y+Math.sin(a)*inner);}ctx.stroke();}if(s.name&&(s.rings||s.shiny||s.hp<s.maxHp)){ctx.font='600 12px Segoe UI';ctx.textAlign='center';ctx.fillStyle=s.shiny?'#83f58b':'#c8d0ff';ctx.fillText(s.name+' · '+fmt(s.value)+' XP',s.x,s.y-radius-13);}if(s.hp<s.maxHp){ctx.fillStyle='#0d1722';ctx.fillRect(s.x-radius,s.y+radius+9,radius*2,4);ctx.fillStyle=s.color;ctx.fillRect(s.x-radius,s.y+radius+9,radius*2*Math.max(0,s.hp/s.maxHp),4);}}
  for(const b of world.bullets){const age=mode==='online'?Math.min(.06,(performance.now()-lastNetUpdate)/1000):0,bx=b.x+(b.vx||0)*age,by=b.y+(b.vy||0)*age;if(!visible(bx,by,30))continue;const color=b.color||'#a2f5d7';const angle=b.angle??Math.atan2(b.vy||0,b.vx||1);ctx.strokeStyle=color+'60';ctx.lineWidth=(b.radius||5)*1.4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(bx-Math.cos(angle)*15,by-Math.sin(angle)*15);ctx.lineTo(bx,by);ctx.stroke();ctx.beginPath();ctx.arc(bx,by,b.radius||5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#112934';ctx.lineWidth=1.5;ctx.stroke();}ctx.lineCap='butt';
  for(const source of world.players){const v=visualPlayers.get(source.id),t=v?{...source,x:v.x,y:v.y,angle:v.angle}:source;if(t.dead||!visible(t.x,t.y,85))continue;tank(ctx,t);if(t.shield>0){ctx.beginPath();ctx.arc(t.x,t.y,37+Math.sin(renderClock*5)*2,0,Math.PI*2);ctx.strokeStyle='#b7dfff88';ctx.lineWidth=2;ctx.stroke();}ctx.textAlign='center';ctx.font='600 12px Segoe UI';ctx.fillStyle=t.id===myId?'#e6fff7':'#cad9df';ctx.fillText(t.name+(t.bot?' · BOT':''),t.x,t.y-44);ctx.fillStyle='#091a23';rounded(t.x-25,t.y+37,50,6,3);ctx.fill();ctx.fillStyle='#83d85d';rounded(t.x-24,t.y+38,48*clamp(t.hp/t.maxHp,0,1),4,2);ctx.fill();if(t.id===p?.id){ctx.strokeStyle='#d9ffee80';ctx.lineWidth=1;ctx.beginPath();ctx.arc(t.x,t.y,32,t.angle-.35,t.angle+.35);ctx.stroke();}}
  for(const particle of particles){if(!visible(particle.x,particle.y,10))continue;ctx.globalAlpha=clamp(particle.life/particle.max,0,1);ctx.fillStyle=particle.color;ctx.fillRect(particle.x,particle.y,particle.size,particle.size);}ctx.globalAlpha=1;
@@ -402,10 +480,14 @@ function drawViewport(vx,vy,vw,vh,camera,p){ctx.save();ctx.beginPath();ctx.rect(
  // Direction marker points to the active relay beyond the viewport.
  if(p&&!p.dead){const r=world.relays.find(r=>r.active);if(r&&Math.hypot(r.x-p.x,r.y-p.y)>270){const dx=(r.x-camera.x)*zoom,dy=(r.y-camera.y)*zoom,edgeX=vw/2-48,edgeY=vh/2-62;const t=Math.min(1,edgeX/Math.max(1,Math.abs(dx)),edgeY/Math.max(1,Math.abs(dy)));if(t<1){ctx.save();ctx.translate(camera.x+dx*t/zoom,camera.y+dy*t/zoom);ctx.rotate(Math.atan2(dy,dx));ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(-6,-6);ctx.lineTo(-6,6);ctx.closePath();ctx.fillStyle='#8bf4cfb3';ctx.fill();ctx.restore();}}}
  ctx.restore();}
-function drawMini(){mini.clearRect(0,0,360,260);mini.fillStyle='#0e202b';mini.fillRect(0,0,360,260);const sx=360/E.config.width,sy=260/E.config.height;mini.fillStyle='#435865';for(const a of world.walls)mini.fillRect(a.x*sx,a.y*sy,a.w*sx,a.h*sy);for(const r of world.relays){mini.beginPath();mini.arc(r.x*sx,r.y*sy,8,0,Math.PI*2);mini.fillStyle=r.active?'#8bf4cf44':'#294552';mini.fill();mini.strokeStyle=r.active?'#8bf4cf':'#45646d';mini.stroke();}for(const p of world.players){if(p.dead)continue;mini.beginPath();mini.arc(p.x*sx,p.y*sy,p.id===myId?4.5:2.5,0,Math.PI*2);mini.fillStyle=p.id===myId?'#ffffff':p.color||'#ffbc7c';mini.fill();}const p=player();if(p){const vw=w/(mode==='local'?2:1),z=scale(vw,h);mini.strokeStyle='#ffffff44';mini.lineWidth=1;mini.strokeRect((cam1.x-vw/2/z)*sx,(cam1.y-h/2/z)*sy,vw/z*sx,h/z*sy);}}
+function drawMini(){mini.clearRect(0,0,360,260);mini.fillStyle='#0e202b';mini.fillRect(0,0,360,260);const sx=360/E.config.width,sy=260/E.config.height;mini.beginPath();mini.ellipse(E.nest.x*sx,E.nest.y*sy,E.nest.radius*sx,E.nest.radius*sy,0,0,Math.PI*2);mini.fillStyle='#8372d855';mini.fill();mini.fillStyle='#435865';for(const a of world.walls)mini.fillRect(a.x*sx,a.y*sy,a.w*sx,a.h*sy);for(const r of world.relays){mini.beginPath();mini.arc(r.x*sx,r.y*sy,8,0,Math.PI*2);mini.fillStyle=r.active?'#8bf4cf44':'#294552';mini.fill();mini.strokeStyle=r.active?'#8bf4cf':'#45646d';mini.stroke();}for(const p of world.players){if(p.dead)continue;mini.beginPath();mini.arc(p.x*sx,p.y*sy,p.id===myId?4.5:2.5,0,Math.PI*2);mini.fillStyle=p.id===myId?'#ffffff':p.color||'#ffbc7c';mini.fill();}const p=player();if(p){const vw=w/(mode==='local'?2:1),z=scale(vw,h);mini.strokeStyle='#ffffff44';mini.lineWidth=1;mini.strokeRect((cam1.x-vw/2/z)*sx,(cam1.y-h/2/z)*sy,vw/z*sx,h/z*sy);}}
 function offerClasses(p,force=false){const options=classOptions(p);$('evolveButton').classList.toggle('hidden',!options.length);if(!options.length){$('classPicker').classList.add('hidden');classOffer='';return;}$('classPicker').querySelector('p').textContent=(C[p.classId]?.name||'Basic')+' → '+options.map(c=>c.name).join(' / ')+' · LEVEL '+(options[0].tier===2?15:30);const signature=p.classId+':'+options.map(c=>c.id).join(',');if(signature===classOffer&&!force)return;classOffer=signature;if(dismissedOffer===signature&&!force)return;$('classList').replaceChildren();for(const c of options){const button=document.createElement('button');button.className='class-card';const cv=document.createElement('canvas');cv.width=192;cv.height=128;const label=document.createElement('b');label.textContent=c.name;const desc=document.createElement('small');desc.textContent=(c.description||'')+' · '+c.hp+' HP · '+c.damage+' DMG';button.append(cv,label,desc);const cc=cv.getContext('2d');cc.translate(96,68);tank(cc,{x:0,y:0,angle:-Math.PI/5,classId:c.id,color:p.color},1.25);button.onclick=()=>{action('class',c.id);$('classPicker').classList.add('hidden');dismissedOffer=signature;tone(780,.15);};$('classList').append(button);}$('classPicker').classList.remove('hidden');}
 function updateHud(){if(!running)return;const p=player();if(!p)return;const cls=C[p.classId]||C.scout,nextTank=p.classId==='scout'?15:cls.tier===2?30:null;$('className').textContent=cls.name;$('playerLevel').textContent='LEVEL '+p.level+' · KILLS '+p.kills;$('xpText').textContent=p.level>=45?'MAX LEVEL':'NEXT LEVEL: '+fmt(p.xp)+' / '+fmt(p.nextXp)+' XP';$('xpFill').style.width=(p.level>=45?100:100*clamp(p.xp/p.nextXp,0,1))+'%';$('levelClassText').textContent='Level '+p.level+' '+cls.name;$('scoreText').textContent='SCORE: '+fmt(p.score);$('scoreBarText').textContent='Score: '+fmt(p.score);$('nextTankText').textContent=nextTank?'NEXT TANK: LEVEL '+nextTank:'FINAL TANK';$('points').textContent=p.points+' points';$('mobilePoints').textContent=p.points;
- for(const id of statIds){const b=$('stat-'+id),level=p.stats[id]||0;b.disabled=!p.points||level>=E.config.statCap||p.dead;b.querySelectorAll('i').forEach((bar,i)=>bar.classList.toggle('filled',i<level));b.setAttribute('aria-label',statNames[id]+', '+level+' z '+E.config.statCap+'. Ulepsz.');}
+ for(const id of statIds){const row=$('stat-'+id),level=p.stats[id]||0,disabled=!p.points||level>=E.config.statCap||p.dead;
+ row.querySelector('.stat-level').textContent=level+' / '+E.config.statCap;
+ row.querySelectorAll('.stat-step').forEach((bar,i)=>{const target=i+1;bar.classList.toggle('filled',target<=level);bar.classList.toggle('affordable',target>level&&target<=level+p.points);bar.disabled=disabled||target<=level;bar.setAttribute('aria-label',statNames[id]+': do '+target+', koszt '+Math.max(0,target-level)+' pkt');});
+ row.querySelectorAll('.stat-actions button').forEach(b=>b.disabled=disabled);
+ }
  $('dashText').textContent=p.dashCooldown>0?p.dashCooldown.toFixed(1)+' s':'Dash';$('dashButton').classList.toggle('ready',p.dashCooldown<=0);$('boostText').textContent=p.boostTime>0?'BOOST '+p.boostTime.toFixed(1)+' s':p.boostCharge?'READY':'Overdrive';$('boostButton').classList.toggle('ready',p.boostCharge||p.boostTime>0);
  const active=world.relays.find(r=>r.active),ri=world.relays.indexOf(active)+1;$('relayTitle').textContent='RELAY '+String(ri||1).padStart(2,'0')+' ACTIVE';$('relayTimer').textContent='Switches in '+Math.ceil(35-(world.time%35))+' s · '+(p.boostCharge?'charged — press F':active&&Math.hypot(p.x-active.x,p.y-active.y)<(active.radius||115)?'charging…':'stay inside for 2 s');
  const humanCount=world.players.filter(t=>!t.bot).length,botCount=world.players.filter(t=>t.bot).length;$('statusText').textContent=mode==='online'?'ROOM '+net?.room+' · '+humanCount+' PLAYERS + '+botCount+' BOTS':mode==='local'?'2 PLAYERS · SHARED KEYBOARD':'SOLO · '+botCount+' BOTS';$('mapPopulation').textContent=world.players.filter(t=>!t.dead).length+' TANKS';
