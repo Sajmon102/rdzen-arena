@@ -33,6 +33,7 @@ try {
 
 const rooms = new Map();
 const sessions = new Map();
+const sessionsById = new Map();
 const joinLimits = new Map();
 const idleInput = Object.freeze({ x: 0, y: 0, angle: 0, fire: false, boost: false, dash: false });
 const MAX_ROOMS = 20;
@@ -100,6 +101,7 @@ function allowSession(session, kind, now) {
 
 function endSession(session) {
   if (!sessions.delete(session.token)) return;
+  sessionsById.delete(session.id);
   session.room.members.delete(session.id);
   Engine.remove(session.room.world, session.id);
   const stream = session.stream;
@@ -169,6 +171,7 @@ const server = http.createServer(async (req, res) => {
       };
       room.members.add(id);
       sessions.set(token, session);
+      sessionsById.set(id, session);
       return json(res, 200, { id, token, room: roomName });
     }
     if (req.method === 'GET' && url.pathname === '/events') {
@@ -249,10 +252,17 @@ const timer = setInterval(() => {
   }
   for (const room of rooms.values()) {
     Engine.step(room.world, dt);
-    const state = 'event: state\ndata: ' + JSON.stringify(Engine.snapshot(room.world)) + '\n\n';
+    const snapshot = Engine.snapshot(room.world);
+    delete snapshot.walls; // Static geometry is sent on every initial connection/reconnection.
+    const state = 'event: state\ndata: ' + JSON.stringify(snapshot, (key, value) => {
+      if (typeof value !== 'number') return value;
+      if (['x','y','vx','vy'].includes(key)) return Math.round(value * 10) / 10;
+      if (['angle','time','life'].includes(key)) return Math.round(value * 1000) / 1000;
+      return value; // Never round health, XP or damage.
+    }) + '\n\n';
     for (const id of room.members) {
       // Room size is capped; room membership never contains client credentials.
-      const session = [...sessions.values()].find(item => item.id === id);
+      const session = sessionsById.get(id);
       const stream = session?.stream;
       if (!stream || stream.destroyed || stream.writableEnded) continue;
       if (stream.writableLength > 1024 * 1024) { stream.destroy(); continue; }
