@@ -22,7 +22,7 @@ try {
   const context = vm.createContext({ console, Math, Date, performance });
   vm.runInContext(match[1], context, { filename: 'arena-engine.js', timeout: 5000 });
   Engine = context.ArenaEngine;
-  for (const method of ['createWorld', 'join', 'remove', 'input', 'step', 'upgrade', 'chooseClass', 'respawn', 'snapshot', 'sandboxStats', 'sandboxWalls']) {
+  for (const method of ['createWorld', 'join', 'remove', 'input', 'step', 'upgrade', 'chooseClass', 'respawn', 'snapshot', 'sandboxStats', 'sandboxWalls', 'sandboxMove']) {
     if (typeof Engine?.[method] !== 'function') throw new Error('Brak funkcji silnika: ' + method);
   }
 } catch (error) {
@@ -234,6 +234,9 @@ const server = http.createServer(async (req, res) => {
         player._spectator=data.enabled;if(!data.enabled)Engine.endSpectator(session.room.world,session.id);
         if(data.enabled){if(!session.sandboxBaseline)session.sandboxBaseline={gameMode:session.room.world.gameMode,walls:session.room.world.walls.map(w=>({...w}))};Engine.input(session.room.world,session.id,idleInput);player._reload=0;}
         return json(res,200,{ok:true});
+      } else if (data.type === 'sandboxMove') {
+        const ok=Engine.sandboxMove(session.room.world,session.id,data.x,data.y);
+        return json(res,ok?200:409,{ok});
       } else if (data.type === 'sandboxStats') {
         const ok=Engine.sandboxStats(session.room.world,session.id,data.reset===true?null:data.values);
         return json(res,200,{ok});
