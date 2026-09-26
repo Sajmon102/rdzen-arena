@@ -82,29 +82,30 @@ html,body{width:100%;height:100%;overscroll-behavior:none}
 .stat-row[data-preview="7"] .stat-step:nth-child(-n+7):not(.filled){background:var(--stat-color);color:#10232b}
 .stat-row[data-preview="8"] .stat-step:nth-child(-n+8):not(.filled){background:var(--stat-color);color:#10232b}
 body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.performance #vignette{display:none}.performance-toggle{padding:9px;margin-top:10px;width:100%;font-size:12px}
+.difficulty-style{padding:9px 5px;font-size:13px}.arena-mode.selected{border-color:var(--mint);color:var(--mint);background:#8bf4cf16}#roundStatus{position:fixed;top:70px;left:50%;transform:translateX(-50%);font-size:11px;pointer-events:none;color:var(--mint);background:#10232ee6;padding:5px 12px;border-radius:12px}@media(pointer:coarse){#roundStatus{top:63px;left:auto;right:12px;transform:none;max-width:55%;font-size:10px}}
 </style>
 </head>
 <body>
 <canvas id="arena" aria-label="Arena czołgów RDZEŃ"></canvas><div id="vignette"></div>
 <main id="menu">
  <section class="lobby panel" aria-label="Rozpocznij grę">
-  <div class="version"><span class="eyebrow">TANK ARENA</span><span class="pill">VOL. 04 · SHAPES</span></div>
+  <div class="version"><span class="eyebrow">TANK ARENA</span><span class="pill">VOL. 05 · TRYBY</span></div>
   <h1>RDZEŃ<span style="color:var(--mint)">.</span></h1>
-  <p style="color:#ffc76a;font-size:12px">HP i XP podstawowych figur według przesłanej wiki. Pełny balans FFA jest jeszcze w przygotowaniu.</p><p class="intro">Destroy shapes. Upgrade your tank.<br>Capture the arena core.</p>
-  <label for="nickname">Your name</label><input id="nickname" maxlength="18" placeholder="Pilot" autocomplete="off" spellcheck="false" value="Pilot">
-  <div class="modes" aria-label="Game mode"><button class="mode selected" data-mode="solo" aria-pressed="true">Solo + Bots</button><button class="mode" data-mode="local" aria-pressed="false">2 Players</button><button class="mode" data-mode="online" aria-pressed="false">Online</button></div>
-  <div id="difficultyFields"><label>Solo difficulty</label><div class="difficulties" aria-label="Enemy difficulty"><button class="difficulty" data-difficulty="easy" aria-pressed="false">Easy</button><button class="difficulty selected" data-difficulty="normal" aria-pressed="true">Normal</button><button class="difficulty" data-difficulty="hard" aria-pressed="false">Hard</button></div></div>
-  <p id="modeHelp">Fight bots instantly, even without internet.</p>
-  <div id="onlineFields" class="hidden"><details id="serverSettings"><summary class="muted" style="font-size:13px;cursor:pointer">Custom server (optional)</summary><label for="serverAddress" style="margin-top:10px">Server address</label><input id="serverAddress" placeholder="http://localhost:8787" aria-describedby="serverHint"></details><div class="pill">AUTO JOIN · Active room selected automatically</div><small id="serverHint" class="muted">Open the same server address. The game connects everyone automatically without a room code.</small></div>
+  <p class="intro">Wybierz arenę. Zdobywaj poziomy.<br>Rozwijaj swój czołg bez limitu.</p>
+  <label for="nickname">Twój nick</label><input id="nickname" maxlength="18" placeholder="Pilot" autocomplete="off" spellcheck="false" value="Pilot">
+  <div class="modes" aria-label="Game mode"><button class="mode selected" data-mode="solo" aria-pressed="true">Solo + boty</button><button class="mode" data-mode="local" aria-pressed="false">2 graczy</button><button class="mode" data-mode="online" aria-pressed="false">Online</button></div>
+  <div id="arenaModeFields"><label>Tryb areny</label><div class="difficulties"><button class="arena-mode selected difficulty-style" data-arena="ffa" aria-pressed="true">FFA</button><button class="arena-mode difficulty-style" data-arena="maze" aria-pressed="false">Labirynt</button><button class="arena-mode difficulty-style" data-arena="grow" aria-pressed="false">Grow</button></div><p id="arenaModeHelp" class="muted" style="font-size:12px">Otwarta arena. Rośniesz do poziomu 45; poziomy zdobywasz dalej.</p></div><div id="difficultyFields"><label>Poziom botów</label><div class="difficulties" aria-label="Enemy difficulty"><button class="difficulty" data-difficulty="easy" aria-pressed="false">Easy</button><button class="difficulty selected" data-difficulty="normal" aria-pressed="true">Normal</button><button class="difficulty" data-difficulty="hard" aria-pressed="false">Hard</button></div></div>
+  <p id="modeHelp">Solo działa także bez internetu.</p>
+  <div id="onlineFields" class="hidden"><details id="serverSettings"><summary class="muted" style="font-size:13px;cursor:pointer">Custom server (optional)</summary><label for="serverAddress" style="margin-top:10px">Server address</label><input id="serverAddress" placeholder="http://localhost:8787" aria-describedby="serverHint"></details><div class="pill">FFA → Labirynt → Grow · zmiana co 15 minut</div><small id="serverHint" class="muted">Kliknij „Graj”, aby dołączyć. Poziom i czołg zostają po zmianie trybu online.</small></div>
   <div id="joinError" class="error hidden" role="alert"></div>
-  <button id="playButton" class="play primary"><span>Enter the arena</span><span aria-hidden="true">↗</span></button>
-  <button class="performance-toggle" data-performance></button><div class="lobby-bottom"><button id="howButton" class="text-button">How to play / controls</button><span>7 classes · 45 levels</span></div>
+  <button id="playButton" class="play primary"><span>Graj</span><span aria-hidden="true">↗</span></button>
+  <button class="performance-toggle" data-performance></button><div class="lobby-bottom"><button id="howButton" class="text-button">How to play / controls</button><span>16 czołgów · poziomy bez limitu</span></div>
  </section>
  <div class="arena-caption">SECTOR 07 / FORGOTTEN REACTOR<br><span style="font-size:10px;line-height:3">FREE FOR ALL · ENERGY RELAYS</span></div>
  <aside class="arena-note panel"><span class="eyebrow">MORE THAN FIREPOWER</span><h2>Energy changes everything.</h2><p>A new relay activates every 35 seconds. Hold the zone, charge Overdrive and turn the fight.</p><div class="relay-preview"></div><div class="version"><span>01 / earn XP</span><span>02 / evolve</span></div></aside>
 </main>
 <div id="hud" class="hud hidden">
- <div class="hud-header"><div><div class="brand"><span class="brand-icon"></span>RDZEŃ</div><div id="statusText" class="status-text">SEKTOR 07 · TRENING</div></div><button id="pauseButton" class="icon-button" aria-label="Otwórz menu">☰</button><button id="soundButton" class="icon-button" aria-label="Włącz dźwięk" title="Dźwięk">♪</button></div>
+ <div id="roundStatus" aria-live="off"></div><div class="hud-header"><div><div class="brand"><span class="brand-icon"></span>RDZEŃ</div><div id="statusText" class="status-text">SEKTOR 07 · TRENING</div></div><button id="pauseButton" class="icon-button" aria-label="Otwórz menu">☰</button><button id="soundButton" class="icon-button" aria-label="Włącz dźwięk" title="Dźwięk">♪</button></div>
  <div class="relay-hud panel"><b><span class="live-light"></span><span id="relayTitle">RELAY 01 ACTIVE</span></b><small id="relayTimer">Switches in 35 s · enter to charge</small></div>
  <div id="connectionBanner" class="connection-banner hidden" role="status"></div>
  <section class="scoreboard panel" aria-label="Ranking"><div class="section-label">LEADERBOARD</div><div id="leaders"></div></section>
@@ -121,14 +122,14 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
  <div id="localInfo" class="local-info panel hidden"><b id="p2Stats">Player 2</b><p>Enter — fire · Shift — dash · P — Overdrive<br>Automatic aim, stats and evolution.</p><button id="p2Respawn" class="hidden">Respawn Player 2</button></div>
  <div id="movePad" class="touch-zone" aria-label="Przeciągnij, aby jechać"><span>RUCH</span></div><div id="aimPad" class="touch-zone" aria-label="Przeciągnij, aby celować i strzelać"><span>CEL / OGIEŃ</span></div>
 </div>
-<div id="helpModal" class="modal-wrap hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><section class="modal panel"><h2 id="helpTitle">Know your tank.</h2><p>Destroy shapes and enemy tanks to earn XP. Touching a shape damages both your tank and the shape. Every level grants one stat point. Click a numbered stat segment to buy up to that level, or MAX to spend available points on one stat. Upgrades are permanent. Eggs are white circles with 0.2 HP, worth 5 XP. Squares have 1 HP / 20 XP; triangles 10 HP / 100 XP; pentagons 75 HP / 500 XP; hexagons 200 HP / 2500 XP. All five families have normal, Beta, Alpha and Omega variants. Larger variants have more HP and award more XP. Explore the purple central nest for better XP and watch out for pink Crashers. Rare green Shiny shapes grant bonus XP. At levels 15 and 30 you can choose a new class or stay with the current one.</p><div class="control-row">Move / aim<span>WASD / mouse</span></div><div class="control-row">Fire / autofire<span>LMB / E</span></div><div class="control-row">Dash / Overdrive<span>Space / F</span></div><div class="control-row">Upgrade stats<span>1–8 · Shift + 1–8 = MAX</span></div><div class="control-row">Menu / sound<span>Esc / M</span></div><div class="tank-tree"><b>TANK EVOLUTIONS</b><span>Basic → Twin → Triplet</span><span>Basic → Sniper → Railgun</span><span>Basic → Heavy → Fortress</span><small>Tier 2: level 15 · Tier 3: level 30 · Max: level 45</small></div><p><b style="color:var(--mint)">Core tutorial:</b> find the glowing active relay, stay inside its ring for 2 seconds, then press F when charged. Overdrive grants 4 seconds of faster movement and fire.</p><p><b style="color:var(--gold)">Two players:</b> Player 2 uses arrows, Enter to fire, Shift to dash and P for Overdrive. Aim, stats and evolution are automatic.</p><p>Bots carry a BOT tag. Online multiplayer needs the included server. Solo and local modes work without installation.</p><div class="modal-footer"><button id="closeHelp" class="primary">Got it</button></div></section></div>
+<div id="helpModal" class="modal-wrap hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><section class="modal panel"><h2 id="helpTitle">Know your tank.</h2><p>Destroy shapes and enemy tanks to earn XP. Touching a shape damages both your tank and the shape. Every level grants one stat point. Click a numbered stat segment to buy up to that level, or MAX to spend available points on one stat. Upgrades are permanent. Eggs are white circles with 0.2 HP, worth 5 XP. Squares have 1 HP / 20 XP; triangles 10 HP / 100 XP; pentagons 75 HP / 500 XP; hexagons 200 HP / 2500 XP. All five families have normal, Beta, Alpha and Omega variants. Larger variants have more HP and award more XP. Explore the purple central nest for better XP and watch out for pink Crashers. Rare green Shiny shapes grant bonus XP. At levels 15 and 30 you can choose a new class or stay with the current one.</p><div class="control-row">Move / aim<span>WASD / mouse</span></div><div class="control-row">Fire / autofire<span>LMB / E</span></div><div class="control-row">Dash / Overdrive<span>Space / F</span></div><div class="control-row">Upgrade stats<span>1–8 · Shift + 1–8 = MAX</span></div><div class="control-row">Menu / sound<span>Esc / M</span></div><div class="tank-tree"><b>TANK EVOLUTIONS</b><span>Basic → Twin → Triplet / Spread Shot</span><span>Basic → Sniper → Railgun / Assassin</span><span>Basic → Heavy → Fortress / Destroyer</span><span>Basic → Machine Gun → Sprayer / Gunner</span><span>Basic → Flank Guard → Octo Tank / Booster</span><small>Klasy: poziom 15 i 30 · Poziomy bez limitu</small></div><p><b style="color:var(--mint)">Core tutorial:</b> find the glowing active relay, stay inside its ring for 2 seconds, then press F when charged. Overdrive grants 4 seconds of faster movement and fire.</p><p><b style="color:var(--gold)">Two players:</b> Player 2 uses arrows, Enter to fire, Shift to dash and P for Overdrive. Aim, stats and evolution are automatic.</p><p>Bots carry a BOT tag. Online multiplayer needs the included server. Solo and local modes work without installation.</p><div class="modal-footer"><button id="closeHelp" class="primary">Got it</button></div></section></div>
 <div id="pauseModal" class="modal-wrap hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><section class="modal panel"><span class="eyebrow">RDZEŃ / MENU</span><h2 id="pauseTitle" style="margin-top:10px">Take a breath.</h2><p id="pauseDescription">Game paused.</p><button class="performance-toggle" data-performance></button><div class="modal-footer"><button id="resumeButton" class="primary">Resume</button><button id="quitButton">Main menu</button></div></section></div>
 <div id="deathModal" class="modal-wrap hidden" role="dialog" aria-modal="true" aria-labelledby="deathTitle"><section class="modal panel"><span class="eyebrow">TANK DESTROYED</span><h2 id="deathTitle" style="margin-top:12px">One more round?</h2><div class="death-number" id="finalScore">0</div><span class="muted" style="font-size:13px">score earned in this run</span><div class="death-grid"><div><small>LEVEL REACHED</small><b id="finalLevel">1</b></div><div><small>TANK KILLS</small><b id="finalKills">0</b></div></div><p>You keep 25% of your score, up to 402,171. Your class and stat build reset, and retained score becomes levels with fresh upgrade points. Respawn score: <b id="respawnScore">0</b>.</p><div class="modal-footer"><button id="respawnButton" class="primary">Respawn</button><button id="deathQuit">Main menu</button></div></section></div>
 
 <script id="arena-engine">
 (function (root) {
   'use strict';
-  const config = { width: 6000, height: 4400, maxLevel: 45, playerRadius: 23, statCap: 8 };
+  const config = { width: 6000, height: 4400, maxLevel: Infinity, playerRadius: 23, statCap: 8 };
   const barrel = (angle, offset, length, width) => ({ angle, offset, length, width });
   const classes = [
     { id:'scout', name:'Basic', tier:1, parent:null, hp:110, speed:238, damage:20, reload:.34, bulletSpeed:730, bulletLife:1.45, radius:23, description:'A nimble all-rounder. Find your playstyle.', barrels:[barrel(0,0,36,14)] },
@@ -139,6 +140,49 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
     { id:'lance', name:'Railgun', tier:3, parent:'sniper', hp:125, speed:253, damage:66, reload:.73, bulletSpeed:1250, bulletLife:1.95, radius:23, pierce:3, description:'Pierce through up to three targets.', barrels:[barrel(0,0,58,15)] },
     { id:'bastion', name:'Fortress', tier:3, parent:'guard', hp:240, speed:191, damage:29, reload:.46, bulletSpeed:710, bulletLife:1.5, radius:27, description:'Dual heavy cannons. Maximum armor.', barrels:[barrel(0,-13,41,17),barrel(0,13,41,17)] }
   ];
+  // Additional branches use the same authoritative firing and upgrade rules.
+  const extraClasses=[
+    ['machine','Machine Gun',2,'scout',112,236,8,.13,690,1.35,23,[[0,0,32,19]],'Szybka seria lekkich pocisków.'],
+    ['flank','Flank Guard',2,'scout',125,250,16,.35,720,1.4,23,[[0,0,37,13],[Math.PI,0,29,11]],'Ogień z przodu i z tyłu.'],
+    ['sprayer','Sprayer',3,'machine',135,240,8,.105,760,1.35,23,[[-.13,-7,32,10],[.13,7,32,10]],'Gęsty ostrzał szerokiego obszaru.'],
+    ['gunner','Gunner',3,'machine',145,223,8,.21,850,1.6,24,[[0,-15,33,8],[0,-5,42,8],[0,5,42,8],[0,15,33,8]],'Cztery lufy i skupione serie.'],
+    ['assassin','Assassin',3,'sniper',115,240,90,1.05,1350,2.1,23,[[0,0,64,12]],'Długi zasięg i mocny pojedynczy strzał.'],
+    ['destroyer','Destroyer',3,'guard',210,188,140,1.3,510,1.8,28,[[0,0,44,29]],'Ciężki, powolny pocisk.'],
+    ['spread','Spread Shot',3,'twin',140,228,12,.42,760,1.45,24,[[-.4,0,30,9],[-.2,0,36,10],[0,0,43,12],[.2,0,36,10],[.4,0,30,9]],'Wachlarz pięciu pocisków.'],
+    ['octo','Octo Tank',3,'flank',165,220,12,.42,710,1.35,25,Array.from({length:8},(_,i)=>[i*Math.PI/4,0,33,11]),'Osiem kierunków strzału.'],
+    ['booster','Booster',3,'flank',130,305,16,.32,760,1.4,23,[[0,0,39,13],[Math.PI-.35,0,29,10],[Math.PI+.35,0,29,10]],'Szybki czołg do pościgów.']
+  ];
+  for(const [id,name,tier,parent,hp,speed,damage,reload,bulletSpeed,bulletLife,radius,guns,description] of extraClasses)classes.push({id,name,tier,parent,hp,speed,damage,reload,bulletSpeed,bulletLife,radius,barrels:guns.map(g=>barrel(...g)),description,bulletRadius:id==='destroyer'?12:5});
+  const gameModes=['ffa','maze','grow'];
+  const modeNames={ffa:'FFA',maze:'Labirynt',grow:'Grow'};
+  function sizeScale(level,mode){const base=.55+.45*Math.min(44,Math.max(0,level-1))/44;return base+(mode==='grow'&&level>45?.18*Math.log2(1+(level-45)/15):0);}
+  function mazeWalls(w){
+    // A spanning tree guarantees connected corridors. Cell centres remain unobstructed.
+    const cols=12,rows=8,cw=460,ch=480,ox=240,oy=280,edges=new Set(),seen=new Set([0]),stack=[0];
+    const edge=(a,b)=>Math.min(a,b)+':'+Math.max(a,b);
+    while(stack.length){const a=stack[stack.length-1],x=a%cols,y=Math.floor(a/cols),neighbours=[];
+      if(x>0&&!seen.has(a-1))neighbours.push(a-1);if(x<cols-1&&!seen.has(a+1))neighbours.push(a+1);if(y>0&&!seen.has(a-cols))neighbours.push(a-cols);if(y<rows-1&&!seen.has(a+cols))neighbours.push(a+cols);
+      if(!neighbours.length){stack.pop();continue;}const b=neighbours[Math.floor(random(w)*neighbours.length)];seen.add(b);edges.add(edge(a,b));stack.push(b);
+    }
+    const walls=[];
+    for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const a=y*cols+x;if(x<cols-1&&!edges.has(edge(a,a+1)))walls.push({x:ox+(x+1)*cw-22,y:oy+y*ch-22,w:44,h:ch+44});if(y<rows-1&&!edges.has(edge(a,a+cols)))walls.push({x:ox+x*cw-22,y:oy+(y+1)*ch-22,w:cw+44,h:44});}
+    return walls;
+  }
+  const standardWalls=[
+      {x:620,y:520,w:180,h:180},{x:1240,y:760,w:160,h:160},{x:1920,y:430,w:200,h:200},{x:2700,y:700,w:170,h:170},{x:3480,y:470,w:190,h:190},{x:4300,y:720,w:170,h:170},{x:5180,y:480,w:210,h:210},
+      {x:420,y:1320,w:170,h:170},{x:1040,y:1580,w:210,h:210},{x:1710,y:1190,w:160,h:160},{x:2450,y:1460,w:190,h:190},{x:3230,y:1120,w:210,h:210},{x:3970,y:1510,w:170,h:170},{x:4740,y:1180,w:200,h:200},{x:5480,y:1530,w:160,h:160},
+      {x:720,y:2240,w:210,h:210},{x:1430,y:2010,w:170,h:170},{x:2110,y:2440,w:190,h:190},{x:2860,y:2070,w:220,h:220},{x:3650,y:2390,w:170,h:170},{x:4380,y:2060,w:210,h:210},{x:5210,y:2380,w:180,h:180},
+      {x:430,y:3180,w:180,h:180},{x:1120,y:2860,w:200,h:200},{x:1780,y:3320,w:170,h:170},{x:2520,y:2980,w:210,h:210},{x:3260,y:3420,w:180,h:180},{x:4010,y:2940,w:200,h:200},{x:4720,y:3370,w:170,h:170},{x:5450,y:3010,w:210,h:210},
+      {x:920,y:3880,w:170,h:170},{x:2230,y:3820,w:200,h:200},{x:3690,y:3890,w:180,h:180},{x:4970,y:3820,w:200,h:200}
+    ];
+  function configureMap(w,mode){w.gameMode=gameModes.includes(mode)?mode:'ffa';w.mapRevision=(w.mapRevision||0)+1;w.walls=w.gameMode==='maze'?mazeWalls(w):standardWalls.map(b=>({...b}));
+    // Place relay zones inside open corridors so every mode remains playable.
+    w.relays.forEach((r,i)=>{const cells=[[1,2],[6,1],[10,3],[9,6],[3,6]],c=cells[i];r.x=240+(c[0]+.5)*460;r.y=280+(c[1]+.5)*480;});
+  }
+  function setGameMode(w,mode){if(!gameModes.includes(mode)||w.gameMode===mode)return false;configureMap(w,mode);w.shapes=[];w.bullets=[];w.events=[];
+    for(const p of w.players){p._gameMode=mode;p.radius=derived(p).r;const pos=spawnPosition(w,true);p.x=pos.x;p.y=pos.y;p.shield=3;p._input.fire=false;p._dashTime=0;}
+    for(let i=0;i<210;i++){const shape=makeShape(w);if(shape)w.shapes.push(shape);}emit(w,'mode',config.width/2,config.height/2,'#8bf4cf',modeNames[mode]);return true;
+  }
   const byClass = Object.fromEntries(classes.map(c=>[c.id,c]));
   const stats = [ {id:'regen',name:'Health Regeneration'}, {id:'health',name:'Max Health'}, {id:'body',name:'Body Damage'}, {id:'bullet',name:'Bullet Speed'}, {id:'penetration',name:'Bullet Penetration'}, {id:'damage',name:'Bullet Damage'}, {id:'reload',name:'Reload'}, {id:'speed',name:'Movement Speed'} ];
   const palette = ['#32c8f2','#ff6b78','#ad7cff','#f6c85f','#62d99c','#f074bd','#718cff','#32d2ba'];
@@ -199,17 +243,22 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
     }
   }
   shapeTypes.crasher={name:'Crasher',sides:3,radius:19,hp:95,color:'#ed78b8',value:180,rings:0,hostile:true};
-  function rollNormalShape(roll){let threshold=0;for(const [type,chance] of normalShapeChances){threshold+=chance;if(roll<threshold)return type;}return null;}
+  function rollNormalShape(roll,mode='ffa'){
+    // FFA follows the supplied per-attempt chances. Maze redistributes weights towards rare tiers.
+    const weighted=mode==='maze',weights=normalShapeChances.map(([type,chance])=>[type,chance*(weighted?[1,2,4,6][shapeTypes[type].rings]:1)]);
+    const total=weighted?weights.reduce((sum,[,v])=>sum+v,0):1;let threshold=0;
+    for(const [type,chance] of weights){threshold+=chance/total;if(roll<threshold)return type;}return null;
+  }
   function makeShape(w,existing) {
     const inNest=existing?existing._nest:w.shapes.length<58,roll=random(w);
-    let type=rollNormalShape(roll);
+    let type=rollNormalShape(roll,w.gameMode);
     if(inNest&&type===null)type='crasher';
     if(type===null){
       // Reserve this slot so later retries cannot accidentally become nest spawns.
       const pending=existing||{id:uid(w,'s'),x:0,y:0,radius:0,hp:0,maxHp:0,_nest:false};
       pending._dead=true;pending._respawn=1;return pending;
     }
-    const kind=shapeTypes[type],shiny=!kind.hostile&&random(w)<.003;
+    const kind=shapeTypes[type],shiny=!kind.hostile&&random(w)<(w.gameMode==='maze'?.009:.003);
     let pos=null;
     for(let tries=0;tries<350;tries++){
       const a=random(w)*Math.PI*2,r=Math.sqrt(random(w))*(nest.radius-kind.radius);
@@ -227,13 +276,8 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
   }
   function createWorld(options={}) {
     const difficulty=['easy','normal','hard'].includes(options.difficulty)?options.difficulty:'hard';
-    const w={time:0,difficulty,players:[],bullets:[],shapes:[],walls:[
-      {x:620,y:520,w:180,h:180},{x:1240,y:760,w:160,h:160},{x:1920,y:430,w:200,h:200},{x:2700,y:700,w:170,h:170},{x:3480,y:470,w:190,h:190},{x:4300,y:720,w:170,h:170},{x:5180,y:480,w:210,h:210},
-      {x:420,y:1320,w:170,h:170},{x:1040,y:1580,w:210,h:210},{x:1710,y:1190,w:160,h:160},{x:2450,y:1460,w:190,h:190},{x:3230,y:1120,w:210,h:210},{x:3970,y:1510,w:170,h:170},{x:4740,y:1180,w:200,h:200},{x:5480,y:1530,w:160,h:160},
-      {x:720,y:2240,w:210,h:210},{x:1430,y:2010,w:170,h:170},{x:2110,y:2440,w:190,h:190},{x:2860,y:2070,w:220,h:220},{x:3650,y:2390,w:170,h:170},{x:4380,y:2060,w:210,h:210},{x:5210,y:2380,w:180,h:180},
-      {x:430,y:3180,w:180,h:180},{x:1120,y:2860,w:200,h:200},{x:1780,y:3320,w:170,h:170},{x:2520,y:2980,w:210,h:210},{x:3260,y:3420,w:180,h:180},{x:4010,y:2940,w:200,h:200},{x:4720,y:3370,w:170,h:170},{x:5450,y:3010,w:210,h:210},
-      {x:920,y:3880,w:170,h:170},{x:2230,y:3820,w:200,h:200},{x:3690,y:3890,w:180,h:180},{x:4970,y:3820,w:200,h:200}
-    ],relays:[{id:'r1',x:1180,y:1880,radius:120,active:true},{id:'r2',x:3180,y:780,radius:120,active:false},{id:'r3',x:4920,y:1750,radius:120,active:false},{id:'r4',x:4490,y:3550,radius:120,active:false},{id:'r5',x:1880,y:3600,radius:120,active:false}],events:[],relaySwitchIn:35,_seed:(finite(options.seed,123)>>>0)||123,_seq:0,_relayIndex:0};
+    const w={time:0,difficulty,players:[],bullets:[],shapes:[],walls:[],relays:[{id:'r1',x:1180,y:1880,radius:120,active:true},{id:'r2',x:3180,y:780,radius:120,active:false},{id:'r3',x:4920,y:1750,radius:120,active:false},{id:'r4',x:4490,y:3550,radius:120,active:false},{id:'r5',x:1880,y:3600,radius:120,active:false}],events:[],relaySwitchIn:35,_seed:(finite(options.seed,123)>>>0)||123,_seq:0,_relayIndex:0};
+    configureMap(w,options.gameMode||'ffa');
     for(let i=0;i<210;i++){const shape=makeShape(w);if(shape)w.shapes.push(shape);}
     const names=['Astra','Kobalt','Echo','Pixel','Neon','Raptor','Błysk','Mira','Hex','Orion'];
     for(let i=0;i<clamp(Math.floor(finite(options.bots,6)),0,16);i++)join(w,{id:'bot'+i,name:names[i%names.length],bot:true});
@@ -241,12 +285,12 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
   }
   function derived(p) {
     const c=byClass[p.classId]||byClass.scout, strength=p.bot?(p._botStrength??1):1;
-    return {c,r:c.radius,hp:(c.hp+p.stats.health*22)*strength,speed:c.speed*(1+p.stats.speed*.062)*(p.boostTime>0?1.25:1),damage:c.damage*(1+p.stats.damage*.125),bodyDamage:(8+p.stats.body*5)*strength,reload:c.reload/(1+p.stats.reload*.105)/(p.boostTime>0?1.65:1),bulletSpeed:c.bulletSpeed*(1+p.stats.bullet*.075),penetration:1+Math.floor(p.stats.penetration/3)};
+    return {c,size:sizeScale(p.level,p._gameMode),r:c.radius*sizeScale(p.level,p._gameMode),hp:(c.hp+p.stats.health*22)*strength,speed:c.speed*(1+p.stats.speed*.062)*(p.boostTime>0?1.25:1),damage:c.damage*(1+p.stats.damage*.125),bodyDamage:(8+p.stats.body*5)*strength,reload:c.reload/(1+p.stats.reload*.105)/(p.boostTime>0?1.65:1),bulletSpeed:c.bulletSpeed*(1+p.stats.bullet*.075),penetration:1+Math.floor(p.stats.penetration/3)};
   }
   function join(w,options={}) {
     const id=String(options.id||uid(w,'p')).slice(0,80);const existing=w.players.find(p=>p.id===id);if(existing)return existing;
     const pos=spawnPosition(w,true),skill=w.difficulty==='easy'?.35+random(w)*.18:w.difficulty==='normal'?.62+random(w)*.2:.84+random(w)*.14,p={id,name:String(options.name||'Pilot').replace(/[<>\x00-\x1f]/g,'').trim().slice(0,18)||'Pilot',x:pos.x,y:pos.y,angle:0,hp:110,maxHp:110,level:1,xp:0,nextXp:xpAt(1),score:0,respawnScore:0,kills:0,deaths:0,points:0,classId:'scout',stats:emptyStats(),color:options.bot?palette[w.players.length%palette.length]:'#32c8f2',bot:!!options.bot,dead:false,respawnIn:0,shield:3,boostTime:0,boostCharge:false,dashCooldown:0,relayProgress:0,radius:23,_input:{x:0,y:0,angle:0,fire:false,boost:false,dash:false},_reload:0,_regen:0,_bodyCooldown:0,_dashTime:0,_dashX:0,_dashY:0,_relayCooldown:0,_aiTime:0,_aiAngle:random(w)*Math.PI*2,_botSkill:skill,_botStrength:w.difficulty==='easy'?.5:w.difficulty==='normal'?1/1.5:1,_botDamage:w.difficulty==='easy'?.58:w.difficulty==='normal'?.78:1,_botReload:w.difficulty==='easy'?.72:w.difficulty==='normal'?.88:1};
-    if(p.bot)p.hp=p.maxHp=derived(p).hp;w.players.push(p);return p;
+    p._gameMode=w.gameMode;p.radius=derived(p).r;if(p.bot)p.hp=p.maxHp=derived(p).hp;w.players.push(p);return p;
   }
   function remove(w,id) { const i=w.players.findIndex(p=>p.id===id);if(i>=0)w.players.splice(i,1);w.bullets=w.bullets.filter(b=>b.ownerId!==id); }
   function input(w,id,value={}) {
@@ -272,25 +316,25 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
   }
   function gain(w,p,value) {
     if(!p||p.dead)return;p.score+=value;p.xp+=value;
-    while(p.level<config.maxLevel&&p.xp>=p.nextXp){p.xp-=p.nextXp;p.level++;p.nextXp=xpAt(p.level);p.points++;p.hp=Math.min(p.maxHp,p.hp+18);emit(w,'level',p.x,p.y,p.color,'POZIOM '+p.level);}
-    if(p.level===config.maxLevel)p.xp=Math.min(p.xp,p.nextXp);
+    while(p.xp>=p.nextXp){p.xp-=p.nextXp;p.level++;p.nextXp=xpAt(p.level);p.points++;p.hp=Math.min(p.maxHp,p.hp+18);emit(w,'level',p.x,p.y,p.color,'POZIOM '+p.level);}
+    p.radius=derived(p).r;
   }
   function killPlayer(w,p,killer) {
-    if(p.dead)return;p.dead=true;p.hp=0;p.deaths++;p.respawnIn=3;p.respawnScore=Math.min(402171,Math.floor(p.score*.25));p._input.fire=false;p._dashTime=0;p.boostTime=0;p.relayProgress=0;
+    if(p.dead)return;p.dead=true;p.hp=0;p.deaths++;p.respawnIn=3;p.respawnScore=Math.floor(p.score*.25);p._input.fire=false;p._dashTime=0;p.boostTime=0;p.relayProgress=0;
     emit(w,'death',p.x,p.y,p.color,p.name);
     if(killer&&!killer.dead&&killer.id!==p.id){killer.kills++;gain(w,killer,130+p.level*18);emit(w,'kill',killer.x,killer.y,killer.color,'+'+(130+p.level*18));}
   }
   function respawn(w,id) {
     const p=w.players.find(p=>p.id===id);if(!p||!p.dead||p.respawnIn>0)return false;
-    const pos=spawnPosition(w,true),kept=p.respawnScore||0;let level=1,xp=kept;while(level<config.maxLevel&&xp>=xpAt(level)){xp-=xpAt(level);level++;}const nextXp=xpAt(level),stats=emptyStats();Object.assign(p,{x:pos.x,y:pos.y,classId:'scout',stats,level,xp:level===config.maxLevel?Math.min(xp,nextXp):xp,nextXp,points:level-1,maxHp:byClass.scout.hp,hp:byClass.scout.hp,radius:byClass.scout.radius,score:kept,dead:false,respawnIn:0,shield:3,boostTime:0,boostCharge:false,dashCooldown:0,relayProgress:0,_regen:0,_reload:.2,_bodyCooldown:0,_relayCooldown:0,_dashTime:0,_input:{x:0,y:0,angle:p.angle,fire:false,boost:false,dash:false}});if(p.bot)p.hp=p.maxHp=derived(p).hp;emit(w,'spawn',p.x,p.y,p.color,'');return true;
+    const pos=spawnPosition(w,true),kept=p.respawnScore||0;let level=1,xp=kept;while(xp>=xpAt(level)){xp-=xpAt(level);level++;}const nextXp=xpAt(level),stats=emptyStats();Object.assign(p,{x:pos.x,y:pos.y,classId:'scout',stats,level,xp,nextXp,points:level-1,maxHp:byClass.scout.hp,hp:byClass.scout.hp,radius:byClass.scout.radius,score:kept,dead:false,respawnIn:0,shield:3,boostTime:0,boostCharge:false,dashCooldown:0,relayProgress:0,_regen:0,_reload:.2,_bodyCooldown:0,_relayCooldown:0,_dashTime:0,_input:{x:0,y:0,angle:p.angle,fire:false,boost:false,dash:false}});p.radius=derived(p).r;if(p.bot)p.hp=p.maxHp=derived(p).hp;emit(w,'spawn',p.x,p.y,p.color,'');return true;
   }
   function damagePlayer(w,p,value,attacker) { if(p.dead||p.shield>0)return;p.hp-=value;p._regen=5;emit(w,'hit',p.x,p.y,p.color,'');if(p.hp<=0)killPlayer(w,p,attacker); }
   function visible(w,a,b) { return !w.walls.some(wall=>segmentRect(a.x,a.y,b.x-a.x,b.y-a.y,wall,8)!==null); }
   function botInput(w,p,dt) {
     p._aiTime-=dt;
     if(p.points>0){const order=['damage','reload','health','speed','bullet'];let k=Math.floor(random(w)*order.length);for(let n=0;n<order.length;n++)if(upgrade(w,p.id,order[(k+n)%order.length]))break;}
-    if(p.classId==='scout'&&p.level>=15)chooseClass(w,p.id,['twin','sniper','guard'][Math.floor(random(w)*3)]);
-    if(p.level>=30){const c=classes.find(c=>c.parent===p.classId&&c.tier===3);if(c)chooseClass(w,p.id,c.id);}
+    if(p.classId==='scout'&&p.level>=15)chooseClass(w,p.id,['twin','sniper','guard','machine','flank'][Math.floor(random(w)*5)]);
+    if(p.level>=30){const choices=classes.filter(c=>c.parent===p.classId&&c.tier===3),c=choices[Math.floor(random(w)*choices.length)];if(c)chooseClass(w,p.id,c.id);}
     if(p._aiTime>0)return;
     p._aiTime=.12+random(w)*.11;
     let target=null,best=Infinity,isEnemy=false;
@@ -318,10 +362,10 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
   }
   function fire(w,p,d) {
     p.shield=0;p._reload=d.reload;
-    for(const br of d.c.barrels){const a=p.angle+br.angle,cos=Math.cos(p.angle),sin=Math.sin(p.angle);const originX=p.x-sin*br.offset,originY=p.y+cos*br.offset;let x=originX+Math.cos(a)*(br.length+4),y=originY+Math.sin(a)*(br.length+4);
+    for(const br of d.c.barrels){const a=p.angle+br.angle,cos=Math.cos(p.angle),sin=Math.sin(p.angle);const originX=p.x-sin*br.offset*d.size,originY=p.y+cos*br.offset*d.size;let x=originX+Math.cos(a)*(br.length+4)*d.size,y=originY+Math.sin(a)*(br.length+4)*d.size;
       // A muzzle protruding through cover must not allow shooting through that cover.
       if(w.walls.some(wall=>segmentRect(p.x,p.y,x-p.x,y-p.y,wall,3)!==null))continue;
-      w.bullets.push({id:uid(w,'b'),ownerId:p.id,x,y,vx:Math.cos(a)*d.bulletSpeed,vy:Math.sin(a)*d.bulletSpeed,radius:d.c.id==='guard'||d.c.id==='bastion'?7:5,color:p.color,damage:d.damage,life:d.c.bulletLife,pierce:Math.max(d.c.pierce||1,d.penetration),_hit:[]});
+      w.bullets.push({id:uid(w,'b'),ownerId:p.id,x,y,vx:Math.cos(a)*d.bulletSpeed,vy:Math.sin(a)*d.bulletSpeed,radius:(d.c.bulletRadius||(d.c.id==='guard'||d.c.id==='bastion'?7:5))*d.size,color:p.color,damage:d.damage,life:d.c.bulletLife,pierce:Math.max(d.c.pierce||1,d.penetration),_hit:[]});
     }
     if(w.bullets.length>1200)w.bullets.splice(0,w.bullets.length-1200);
   }
@@ -368,9 +412,9 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
     }}
   }
   function snapshot(w) {
-    return {time:w.time,relaySwitchIn:w.relaySwitchIn,players:w.players.map(p=>({id:p.id,name:p.name,x:p.x,y:p.y,angle:p.angle,hp:p.hp,maxHp:p.maxHp,level:p.level,xp:p.xp,nextXp:p.nextXp,score:p.score,respawnScore:p.respawnScore||0,kills:p.kills,deaths:p.deaths,points:p.points,classId:p.classId,stats:copyStats(p.stats),color:p.color,bot:p.bot,dead:p.dead,respawnIn:p.respawnIn,shield:p.shield,boostTime:p.boostTime,boostCharge:p.boostCharge,dashCooldown:p.dashCooldown,relayProgress:p.relayProgress,radius:p.radius})),bullets:w.bullets.map(b=>({id:b.id,ownerId:b.ownerId,x:b.x,y:b.y,vx:b.vx,vy:b.vy,radius:b.radius,color:b.color,life:b.life,pierce:b.pierce})),shapes:w.shapes.filter(s=>!s._dead).map(s=>({id:s.id,x:s.x,y:s.y,radius:s.radius,sides:s.sides,type:s.type,name:s.name,rings:s.rings,hostile:s.hostile,shiny:s.shiny,hp:s.hp,maxHp:s.maxHp,color:s.color,value:s.value,angle:s.angle})),walls:w.walls.map(b=>({...b})),relays:w.relays.map(r=>({...r})),events:w.events.map(e=>({...e}))};
+    return {gameMode:w.gameMode,mapRevision:w.mapRevision,rotationRemaining:w.rotationRemaining??null,time:w.time,relaySwitchIn:w.relaySwitchIn,players:w.players.map(p=>({id:p.id,name:p.name,x:p.x,y:p.y,angle:p.angle,hp:p.hp,maxHp:p.maxHp,level:p.level,xp:p.xp,nextXp:p.nextXp,score:p.score,respawnScore:p.respawnScore||0,kills:p.kills,deaths:p.deaths,points:p.points,classId:p.classId,stats:copyStats(p.stats),color:p.color,bot:p.bot,dead:p.dead,respawnIn:p.respawnIn,shield:p.shield,boostTime:p.boostTime,boostCharge:p.boostCharge,dashCooldown:p.dashCooldown,relayProgress:p.relayProgress,radius:p.radius})),bullets:w.bullets.map(b=>({id:b.id,ownerId:b.ownerId,x:b.x,y:b.y,vx:b.vx,vy:b.vy,radius:b.radius,color:b.color,life:b.life,pierce:b.pierce})),shapes:w.shapes.filter(s=>!s._dead).map(s=>({id:s.id,x:s.x,y:s.y,radius:s.radius,sides:s.sides,type:s.type,name:s.name,rings:s.rings,hostile:s.hostile,shiny:s.shiny,hp:s.hp,maxHp:s.maxHp,color:s.color,value:s.value,angle:s.angle})),walls:w.walls.map(b=>({...b})),relays:w.relays.map(r=>({...r})),events:w.events.map(e=>({...e}))};
   }
-  root.ArenaEngine={config,classes,stats,nest,shapeTypes,normalShapeChances,rollNormalShape,createWorld,join,remove,input,step,upgrade,chooseClass,respawn,snapshot};
+  root.ArenaEngine={config,classes,stats,nest,gameModes,modeNames,sizeScale,setGameMode,shapeTypes,normalShapeChances,rollNormalShape,createWorld,join,remove,input,step,upgrade,chooseClass,respawn,snapshot};
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 </script>
@@ -380,6 +424,7 @@ const E=globalThis.ArenaEngine,$=id=>document.getElementById(id),canvas=$('arena
 const C=Object.fromEntries(E.classes.map(c=>[c.id,c]));
 const statNames={regen:'Health Regeneration',health:'Max Health',body:'Body Damage',bullet:'Bullet Speed',penetration:'Bullet Penetration',damage:'Bullet Damage',reload:'Reload',speed:'Movement Speed'};
 const statIds=['regen','health','body','bullet','penetration','damage','reload','speed'];
+let arenaMode='ffa',lastMapRevision=null;
 let mode='solo',difficulty='normal',running=false,paused=false,world=E.createWorld({bots:7,difficulty:'normal',seed:1407}),myId=null,p2Id=null,net=null,netEpoch=0,joining=false;
 let w=innerWidth,h=innerHeight,dpr=Math.min(devicePixelRatio||1,2),last=performance.now(),accumulator=0,hudClock=0,inputClock=0,pointer={x:w/2,y:h/2,down:false},keys=new Set(),autoFire=false;
 let nextDash=false,nextBoost=false,nextP2Dash=false,nextP2Boost=false,touchMove={x:0,y:0},touchAim=null;
@@ -411,18 +456,19 @@ function releaseInput(){keys.clear();pointer.down=false;touchMove={x:0,y:0};touc
 function showModal(id){$(id).classList.remove('hidden');$(id).querySelector('button')?.focus();releaseInput();}
 function hideModal(id){$(id).classList.add('hidden');}
 function isOverlay(){return ['helpModal','pauseModal','deathModal'].some(id=>!$(id).classList.contains('hidden'));}
-document.querySelectorAll('.mode').forEach(button=>button.onclick=()=>{if(joining)return;mode=button.dataset.mode;document.querySelectorAll('.mode').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',b===button?'true':'false');});$('difficultyFields').classList.toggle('hidden',mode!=='solo');$('onlineFields').classList.toggle('hidden',mode!=='online');$('joinError').classList.add('hidden');$('modeHelp').textContent={solo:'Choose bot difficulty and fight offline.',local:'Two players on one keyboard. Bots use Normal difficulty.',online:'Automatically join the active room. Bots use Normal difficulty.'}[mode];});
+document.querySelectorAll('.mode').forEach(button=>button.onclick=()=>{if(joining)return;mode=button.dataset.mode;document.querySelectorAll('.mode').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',b===button?'true':'false');});$('arenaModeFields').classList.toggle('hidden',mode==='online');$('difficultyFields').classList.toggle('hidden',mode!=='solo');$('onlineFields').classList.toggle('hidden',mode!=='online');$('joinError').classList.add('hidden');$('modeHelp').textContent={solo:'Wybierz arenę i poziom botów. Graj bez internetu.',local:'Dwóch graczy na jednej klawiaturze. Gracz 2: strzałki i Enter.',online:'Wspólna arena zmienia tryb co 15 minut. Dołącz przyciskiem Graj.'}[mode];});
 document.querySelectorAll('.difficulty').forEach(button=>button.onclick=()=>{difficulty=button.dataset.difficulty;document.querySelectorAll('.difficulty').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',b===button?'true':'false');});});
-function setJoining(value){joining=value;$('playButton').disabled=value;$('playButton').firstElementChild.textContent=value?'Connecting…':'Enter the arena';document.querySelectorAll('.mode').forEach(b=>b.disabled=value);}
-async function start(){if(joining)return;const name=nickname.value.trim().slice(0,18)||'Pilot';try{localStorage.setItem('rdzen-name',name);}catch{}$('joinError').classList.add('hidden');autoFire=false;releaseInput();particles=[];floatTexts=[];seenEvents.clear();lastDead=false;lastLevel=1;classOffer='';dismissedOffer='';uiRevision='';
- if(mode==='online'){setJoining(true);try{await connect(name);}catch(err){disconnect();$('joinError').textContent=err.message||'Nie udało się połączyć z serwerem.';$('joinError').classList.remove('hidden');setJoining(false);return;}setJoining(false);}else{const soloBots={easy:4,normal:7,hard:10};world=E.createWorld({bots:mode==='local'?6:soloBots[difficulty],difficulty:mode==='local'?'normal':difficulty,seed:Math.floor(Math.random()*999999)});myId='pilot1';E.join(world,{id:myId,name});p2Id=null;if(mode==='local'){p2Id='pilot2';E.join(world,{id:p2Id,name:'Gracz 2'});}}
+document.querySelectorAll('.arena-mode').forEach(b=>b.onclick=()=>{arenaMode=b.dataset.arena;document.querySelectorAll('.arena-mode').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',String(x===b));});$('arenaModeHelp').textContent={ffa:'Otwarta arena. Rośniesz do poziomu 45; poziomy zdobywasz dalej.',maze:'Połączone korytarze. Większe szanse na Beta, Alpha, Omega i Shiny.',grow:'Rozmiar czołgu rośnie również po poziomie 45. Poziomy bez limitu.'}[arenaMode];});
+function setJoining(value){joining=value;$('playButton').disabled=value;$('playButton').firstElementChild.textContent=value?'Connecting…':'Graj';document.querySelectorAll('.mode').forEach(b=>b.disabled=value);}
+async function start(){if(joining)return;const name=nickname.value.trim().slice(0,18)||'Pilot';try{localStorage.setItem('rdzen-name',name);}catch{}$('joinError').classList.add('hidden');autoFire=false;releaseInput();particles=[];floatTexts=[];seenEvents.clear();lastDead=false;lastLevel=1;classOffer='';dismissedOffer='';uiRevision='';lastMapRevision=null;
+ if(mode==='online'){setJoining(true);try{await connect(name);}catch(err){disconnect();$('joinError').textContent=err.message||'Nie udało się połączyć z serwerem.';$('joinError').classList.remove('hidden');setJoining(false);return;}setJoining(false);}else{const soloBots={easy:4,normal:7,hard:10};world=E.createWorld({bots:mode==='local'?6:soloBots[difficulty],difficulty:mode==='local'?'normal':difficulty,gameMode:arenaMode,seed:Math.floor(Math.random()*999999)});myId='pilot1';E.join(world,{id:myId,name});p2Id=null;if(mode==='local'){p2Id='pilot2';E.join(world,{id:p2Id,name:'Gracz 2'});}}
  running=true;paused=false;visualPlayers.clear();lastLevel=player()?.level||1;cam1.x=player()?.x||E.config.width/2;cam1.y=player()?.y||E.config.height/2;cam2.x=player(p2Id)?.x||E.config.width/2;cam2.y=player(p2Id)?.y||E.config.height/2;
  $('menu').classList.add('hidden');$('hud').classList.remove('hidden');$('coreTutorial').classList.remove('hidden');document.body.classList.toggle('local',mode==='local');['localBadge1','localBadge2','localInfo'].forEach(id=>$(id).classList.toggle('hidden',mode!=='local'));$('connectionBanner').classList.add('hidden');updateHud();tone(500,.12);toast(mode==='online'?'Connected. Room: '+net.room:'Destroy shapes and earn upgrade points.');}
 $('playButton').onclick=start;
 async function connect(name){let base=$('serverAddress').value.trim().replace(/\/+$/,'');let url;try{url=new URL(base);}catch{throw Error('Wpisz pełny adres, np. http://localhost:8787.');}if(!['http:','https:'].includes(url.protocol)||url.username||url.password)throw Error('Serwer musi mieć adres http:// lub https://.');if(location.protocol==='https:'&&url.protocol==='http:')throw Error('Otwórz grę pod adresem serwera albo użyj serwera HTTPS.');base=url.origin;const room='';
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),6500);let res;try{res=await fetch(base+'/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,room}),signal:controller.signal});}catch{throw Error('Serwer nie odpowiada. Uruchom START-MULTIPLAYER i sprawdź wpisany adres.');}finally{clearTimeout(timer);}const data=await res.json();if(!res.ok)throw Error(data.error||'Nie można dołączyć do pokoju.');
  myId=data.id;p2Id=null;const epoch=++netEpoch;net={base,id:data.id,token:data.token,room:data.room,source:null,pending:false,errors:0};const source=new EventSource(base+'/events?token='+encodeURIComponent(data.token));net.source=source;lastNetUpdate=performance.now();
- await new Promise((resolve,reject)=>{let ready=false;const timeout=setTimeout(()=>{if(!ready)reject(Error('Nie otrzymano stanu areny. Spróbuj ponownie.'));},8000);source.addEventListener('state',ev=>{if(epoch!==netEpoch)return;try{const state=JSON.parse(ev.data);if(!Array.isArray(state.players))return;world={...state,walls:state.walls||world.walls};lastNetUpdate=performance.now();if(net)net.errors=0;$('connectionBanner').classList.add('hidden');if(!ready){ready=true;clearTimeout(timeout);resolve();}}catch{}});source.onerror=()=>{if(epoch!==netEpoch)return;if(ready&&running){$('connectionBanner').textContent='Przerwano połączenie. Próba ponownego połączenia…';$('connectionBanner').classList.remove('hidden');}};});}
+ await new Promise((resolve,reject)=>{let ready=false;const timeout=setTimeout(()=>{if(!ready)reject(Error('Nie otrzymano stanu areny. Spróbuj ponownie.'));},8000);source.addEventListener('state',ev=>{if(epoch!==netEpoch)return;try{const state=JSON.parse(ev.data);if(!Array.isArray(state.players))return;if(lastMapRevision!==null&&state.mapRevision!==lastMapRevision){visualPlayers.clear();particles=[];floatTexts=[];seenEvents.clear();releaseInput();toast('Nowy tryb: '+(E.modeNames[state.gameMode]||state.gameMode));}lastMapRevision=state.mapRevision;world={...state,walls:state.walls||world.walls};lastNetUpdate=performance.now();if(net)net.errors=0;$('connectionBanner').classList.add('hidden');if(!ready){ready=true;clearTimeout(timeout);resolve();}}catch{}});source.onerror=()=>{if(epoch!==netEpoch)return;if(ready&&running){$('connectionBanner').textContent='Przerwano połączenie. Próba ponownego połączenia…';$('connectionBanner').classList.remove('hidden');}};});}
 function disconnect(){++netEpoch;if(net){const old=net;old.source?.close();fetch(old.base+'/action',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+old.token},body:JSON.stringify({type:'leave'}),keepalive:true}).catch(()=>{});net=null;}}
 async function send(path,body){if(!net)return null;const current=net;const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),4000);try{const r=await fetch(current.base+path,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+current.token},body:JSON.stringify(body),signal:controller.signal});if(!r.ok){if(r.status===401&&current===net){$('connectionBanner').textContent='Sesja wygasła. Wróć do menu i dołącz ponownie.';$('connectionBanner').classList.remove('hidden');}return null;}return await r.json().catch(()=>({ok:true}));}catch{return null;}finally{clearTimeout(timer);}}
 function action(type,value,id=myId,target){if(mode==='online'){const body={type};if(type==='upgrade'){body.stat=value;if(target!==undefined)body.target=target;}if(type==='class')body.classId=value;return send('/action',body);}if(type==='upgrade')return E.upgrade(world,id,value,target);if(type==='class')return E.chooseClass(world,id,value);if(type==='respawn')return E.respawn(world,id);}
@@ -479,7 +525,7 @@ function autoUpgradeP2(){const p=player(p2Id);if(!p||p.dead)return;for(let tries
 function scale(vw,vh){return clamp(Math.min(vw/1250,vh/850),.48,1.15);}
 function rounded(x,y,ww,hh,r){ctx.beginPath();ctx.roundRect(x,y,ww,hh,r);}
 function polygon(cx,cy,r,n,angle=0){ctx.beginPath();if(n===0){ctx.arc(cx,cy,r,0,Math.PI*2);ctx.closePath();return;}for(let i=0;i<n;i++){const a=angle+i*Math.PI*2/n;const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.closePath();}
-function tank(targetCtx,p,size=1){const cls=C[p.classId]||C.scout,color=p.color||'#32c8f2',radius=(p.radius||((p.classId==='guard'||p.classId==='bastion')?27:23))*1.08;targetCtx.save();targetCtx.translate(p.x||0,p.y||0);targetCtx.scale(size,size);targetCtx.rotate(p.angle||0);targetCtx.lineJoin='round';
+function tank(targetCtx,p,size=1){const cls=C[p.classId]||C.scout,color=p.color||'#32c8f2',radius=cls.radius*1.08;size*=(p.radius||cls.radius)/cls.radius;targetCtx.save();targetCtx.translate(p.x||0,p.y||0);targetCtx.scale(size,size);targetCtx.rotate(p.angle||0);targetCtx.lineJoin='round';
  if(p.boostTime>0){targetCtx.beginPath();targetCtx.arc(0,0,radius+11+Math.sin(renderClock*10)*3,0,Math.PI*2);targetCtx.strokeStyle='#ffe477';targetCtx.lineWidth=3;targetCtx.stroke();}
  let barrels=cls.barrels;if(!barrels?.length)barrels=[{length:40,width:14,offset:0,angle:0}];
  for(const b of barrels){const lengthScale=cls.id==='sniper'||cls.id==='lance'?1.2:cls.id==='storm'?1.3:1.27,widthScale=cls.id==='twin'||cls.id==='storm'?1.26:cls.id==='guard'||cls.id==='bastion'?1.22:1.38,barrelLength=(b.length||38)*lengthScale,barrelWidth=(b.width||12)*widthScale,barrelOffset=(b.offset||0)*.94;targetCtx.save();targetCtx.rotate(b.angle||0);targetCtx.beginPath();targetCtx.rect(-4,barrelOffset-barrelWidth/2,barrelLength+4,barrelWidth);targetCtx.fillStyle='#b7c0c5';targetCtx.strokeStyle='#59646b';targetCtx.lineWidth=4;targetCtx.fill();targetCtx.stroke();targetCtx.restore();}
@@ -495,7 +541,7 @@ function drawViewport(vx,vy,vw,vh,camera,p){ctx.save();ctx.beginPath();ctx.rect(
  for(const wall of world.walls){if(!visible(wall.x+wall.w/2,wall.y+wall.h/2,Math.max(wall.w,wall.h)))continue;ctx.fillStyle='#07162085';rounded(wall.x+5,wall.y+7,wall.w,wall.h,7);ctx.fill();ctx.fillStyle='#273b46';ctx.strokeStyle='#4a626d';ctx.lineWidth=2;rounded(wall.x,wall.y,wall.w,wall.h,5);ctx.fill();ctx.stroke();ctx.strokeStyle='#607a842e';ctx.beginPath();ctx.moveTo(wall.x+8,wall.y+8);ctx.lineTo(wall.x+wall.w-8,wall.y+8);ctx.stroke();}
  for(const s of world.shapes){if(!visible(s.x,s.y,(s.radius||65)+30)||s.hp<=0)continue;const radius=s.radius||18,sides=s.sides??4,angle=s.angle||0;if(!performanceMode){polygon(s.x+4,s.y+6,radius,sides,angle);ctx.fillStyle='#06101a55';ctx.fill();}polygon(s.x,s.y,radius,sides,angle);ctx.fillStyle=s.color||'#f5cf55';ctx.strokeStyle='#59646b';ctx.lineWidth=3;ctx.fill();ctx.stroke();const rings=s.rings||0;ctx.strokeStyle='#35434caa';ctx.lineWidth=2;for(let ring=1;ring<=rings;ring++){polygon(s.x,s.y,radius*(1-ring*.2),sides,angle+(sides?ring*Math.PI/sides:0));ctx.stroke();}if(rings){const inner=radius*(1-rings*.2);ctx.beginPath();for(let i=0;i<sides;i++){const a=angle+i*Math.PI*2/sides;ctx.moveTo(s.x+Math.cos(a)*radius*.94,s.y+Math.sin(a)*radius*.94);ctx.lineTo(s.x+Math.cos(a)*inner,s.y+Math.sin(a)*inner);}ctx.stroke();}if(s.name&&(!performanceMode||s.shiny||s.hp<s.maxHp)&&(s.rings||s.shiny||s.hp<s.maxHp)){ctx.font='600 12px Segoe UI';ctx.textAlign='center';ctx.fillStyle=s.shiny?'#83f58b':'#c8d0ff';ctx.fillText(s.name+' · '+fmt(s.value)+' XP',s.x,s.y-radius-13);}if(s.hp<s.maxHp){ctx.fillStyle='#0d1722';ctx.fillRect(s.x-radius,s.y+radius+9,radius*2,4);ctx.fillStyle=s.color;ctx.fillRect(s.x-radius,s.y+radius+9,radius*2*Math.max(0,s.hp/s.maxHp),4);}}
  for(const b of world.bullets){const age=mode==='online'?Math.min(.06,(performance.now()-lastNetUpdate)/1000):0,bx=b.x+(b.vx||0)*age,by=b.y+(b.vy||0)*age;if(!visible(bx,by,30))continue;const color=b.color||'#a2f5d7';const angle=b.angle??Math.atan2(b.vy||0,b.vx||1);ctx.strokeStyle=color+'60';ctx.lineWidth=(b.radius||5)*1.4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(bx-Math.cos(angle)*15,by-Math.sin(angle)*15);ctx.lineTo(bx,by);ctx.stroke();ctx.beginPath();ctx.arc(bx,by,b.radius||5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#112934';ctx.lineWidth=1.5;ctx.stroke();}ctx.lineCap='butt';
- for(const source of world.players){const v=visualPlayers.get(source.id),t=v?{...source,x:v.x,y:v.y,angle:v.angle}:source;if(t.dead||!visible(t.x,t.y,85))continue;tank(ctx,t);if(t.shield>0){ctx.beginPath();ctx.arc(t.x,t.y,37+Math.sin(renderClock*5)*2,0,Math.PI*2);ctx.strokeStyle='#b7dfff88';ctx.lineWidth=2;ctx.stroke();}ctx.textAlign='center';ctx.font='600 12px Segoe UI';ctx.fillStyle=t.id===myId?'#e6fff7':'#cad9df';ctx.fillText(t.name+(t.bot?' · BOT':''),t.x,t.y-44);ctx.fillStyle='#091a23';rounded(t.x-25,t.y+37,50,6,3);ctx.fill();ctx.fillStyle='#83d85d';rounded(t.x-24,t.y+38,48*clamp(t.hp/t.maxHp,0,1),4,2);ctx.fill();if(t.id===p?.id){ctx.strokeStyle='#d9ffee80';ctx.lineWidth=1;ctx.beginPath();ctx.arc(t.x,t.y,32,t.angle-.35,t.angle+.35);ctx.stroke();}}
+ for(const source of world.players){const v=visualPlayers.get(source.id),t=v?{...source,x:v.x,y:v.y,angle:v.angle}:source;if(t.dead||!visible(t.x,t.y,Math.max(85,t.radius*3)))continue;tank(ctx,t);if(t.shield>0){ctx.beginPath();ctx.arc(t.x,t.y,37+Math.sin(renderClock*5)*2,0,Math.PI*2);ctx.strokeStyle='#b7dfff88';ctx.lineWidth=2;ctx.stroke();}ctx.textAlign='center';ctx.font='600 12px Segoe UI';ctx.fillStyle=t.id===myId?'#e6fff7':'#cad9df';ctx.fillText(t.name+(t.bot?' · BOT':''),t.x,t.y-t.radius-21);ctx.fillStyle='#091a23';rounded(t.x-25,t.y+t.radius+14,50,6,3);ctx.fill();ctx.fillStyle='#83d85d';rounded(t.x-24,t.y+t.radius+15,48*clamp(t.hp/t.maxHp,0,1),4,2);ctx.fill();if(t.id===p?.id){ctx.strokeStyle='#d9ffee80';ctx.lineWidth=1;ctx.beginPath();ctx.arc(t.x,t.y,t.radius+9,t.angle-.35,t.angle+.35);ctx.stroke();}}
  for(const particle of particles){if(!visible(particle.x,particle.y,10))continue;ctx.globalAlpha=clamp(particle.life/particle.max,0,1);ctx.fillStyle=particle.color;ctx.fillRect(particle.x,particle.y,particle.size,particle.size);}ctx.globalAlpha=1;
  for(const t of floatTexts){ctx.globalAlpha=clamp(t.life,0,1);ctx.fillStyle=t.color;ctx.font='700 15px Segoe UI';ctx.textAlign='center';ctx.fillText(t.text,t.x,t.y);}ctx.globalAlpha=1;
  // Direction marker points to the active relay beyond the viewport.
@@ -503,7 +549,7 @@ function drawViewport(vx,vy,vw,vh,camera,p){ctx.save();ctx.beginPath();ctx.rect(
  ctx.restore();}
 function drawMini(){if(!$('minimap').getClientRects().length)return;mini.clearRect(0,0,360,260);mini.fillStyle='#0e202b';mini.fillRect(0,0,360,260);const sx=360/E.config.width,sy=260/E.config.height;mini.beginPath();mini.ellipse(E.nest.x*sx,E.nest.y*sy,E.nest.radius*sx,E.nest.radius*sy,0,0,Math.PI*2);mini.fillStyle='#8372d855';mini.fill();mini.fillStyle='#435865';for(const a of world.walls)mini.fillRect(a.x*sx,a.y*sy,a.w*sx,a.h*sy);for(const r of world.relays){mini.beginPath();mini.arc(r.x*sx,r.y*sy,8,0,Math.PI*2);mini.fillStyle=r.active?'#8bf4cf44':'#294552';mini.fill();mini.strokeStyle=r.active?'#8bf4cf':'#45646d';mini.stroke();}for(const p of world.players){if(p.dead)continue;mini.beginPath();mini.arc(p.x*sx,p.y*sy,p.id===myId?4.5:2.5,0,Math.PI*2);mini.fillStyle=p.id===myId?'#ffffff':p.color||'#ffbc7c';mini.fill();}const p=player();if(p){const vw=w/(mode==='local'?2:1),z=scale(vw,h);mini.strokeStyle='#ffffff44';mini.lineWidth=1;mini.strokeRect((cam1.x-vw/2/z)*sx,(cam1.y-h/2/z)*sy,vw/z*sx,h/z*sy);}}
 function offerClasses(p,force=false){const options=classOptions(p);$('evolveButton').classList.toggle('hidden',!options.length);if(!options.length){$('classPicker').classList.add('hidden');classOffer='';return;}$('classPicker').querySelector('p').textContent=(C[p.classId]?.name||'Basic')+' → '+options.map(c=>c.name).join(' / ')+' · LEVEL '+(options[0].tier===2?15:30);const signature=p.classId+':'+options.map(c=>c.id).join(',');if(signature===classOffer&&!force)return;classOffer=signature;if(dismissedOffer===signature&&!force)return;$('classList').replaceChildren();for(const c of options){const button=document.createElement('button');button.className='class-card';const cv=document.createElement('canvas');cv.width=192;cv.height=128;const label=document.createElement('b');label.textContent=c.name;const desc=document.createElement('small');desc.textContent=(c.description||'')+' · '+c.hp+' HP · '+c.damage+' DMG';button.append(cv,label,desc);const cc=cv.getContext('2d');cc.translate(96,68);tank(cc,{x:0,y:0,angle:-Math.PI/5,classId:c.id,color:p.color},1.25);button.onclick=()=>{action('class',c.id);$('classPicker').classList.add('hidden');dismissedOffer=signature;tone(780,.15);};$('classList').append(button);}$('classPicker').classList.remove('hidden');}
-function updateHud(){if(!running)return;const p=player();if(!p)return;const cls=C[p.classId]||C.scout,nextTank=p.classId==='scout'?15:cls.tier===2?30:null;$('className').textContent=cls.name;$('playerLevel').textContent='LEVEL '+p.level+' · KILLS '+p.kills;$('xpText').textContent=p.level>=45?'MAX LEVEL':'NEXT LEVEL: '+fmt(p.xp)+' / '+fmt(p.nextXp)+' XP';$('xpFill').style.width=(p.level>=45?100:100*clamp(p.xp/p.nextXp,0,1))+'%';$('levelClassText').textContent='Level '+p.level+' '+cls.name;$('scoreText').textContent='SCORE: '+fmt(p.score);$('scoreBarText').textContent='Score: '+fmt(p.score);$('nextTankText').textContent=nextTank?'NEXT TANK: LEVEL '+nextTank:'FINAL TANK';$('points').textContent=p.points+' points';$('mobilePoints').textContent=p.points;
+function updateHud(){if(!running)return;const p=player();if(!p)return;const seconds=Math.max(0,Math.ceil(world.rotationRemaining||0));$('roundStatus').textContent=(E.modeNames[world.gameMode]||'FFA')+(mode==='online'?' · zmiana za '+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'):' · poziomy bez limitu');const cls=C[p.classId]||C.scout,nextTank=p.classId==='scout'?15:cls.tier===2?30:null;$('className').textContent=cls.name;$('playerLevel').textContent='LEVEL '+p.level+' · KILLS '+p.kills;$('xpText').textContent='NEXT LEVEL: '+fmt(p.xp)+' / '+fmt(p.nextXp)+' XP';$('xpFill').style.width=(100*clamp(p.xp/p.nextXp,0,1))+'%';$('levelClassText').textContent='Level '+p.level+' '+cls.name;$('scoreText').textContent='SCORE: '+fmt(p.score);$('scoreBarText').textContent='Score: '+fmt(p.score);$('nextTankText').textContent=nextTank?'NEXT TANK: LEVEL '+nextTank:'FINAL TANK';$('points').textContent=p.points+' points';$('mobilePoints').textContent=p.points;
  const revision=p.id+':'+p.points+':'+p.dead+':'+statIds.map(id=>p.stats[id]||0).join(',');
  if(revision!==uiRevision){uiRevision=revision;for(const id of statIds){const row=$('stat-'+id),level=p.stats[id]||0,disabled=!p.points||level>=E.config.statCap||p.dead;
  row.querySelector('.stat-level').textContent=level+' / '+E.config.statCap;
@@ -531,24 +577,9 @@ function tick(now){if(now-last<1000/(running?60:30)-.5){requestAnimationFrame(ti
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);if(running&&mode==='local'){drawViewport(0,0,w/2,h,cam1,me);drawViewport(w/2,0,w/2,h,cam2,p2);ctx.fillStyle='#0c1825';ctx.fillRect(w/2-2,0,4,h);}else drawViewport(0,0,w,h,cam1,me);
  if(hudClock>=.12){hudClock=0;updateHud();}requestAnimationFrame(tick);}
 // A small read-only inspection hook helps verify that the downloadable game is running.
-globalThis.RdzenArena={getState:()=>({running,mode,difficulty,paused,world:E.snapshot(world),myId,p2Id}),getPerformance:()=>({enabled:performanceMode,pixelRatio:dpr}),version:'2.2'};
+globalThis.RdzenArena={getState:()=>({running,mode,difficulty,paused,world:E.snapshot(world),myId,p2Id}),getPerformance:()=>({enabled:performanceMode,pixelRatio:dpr}),version:'3.0'};
 addEventListener('pagehide',disconnect);requestAnimationFrame(tick);
-// Auto-join only a verified arena server; keep offline play when no server is running.
-let autoJoinCancelled=false;
-$('menu').addEventListener('pointerdown',()=>{autoJoinCancelled=true;},{once:true});
-$('menu').addEventListener('keydown',()=>{autoJoinCancelled=true;},{once:true});
-async function autoJoin(){
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),3000);
- try{
-  const response=await fetch($('serverAddress').value+'/health',{signal:controller.signal});
-  if(!response.ok)return;
-  const health=await response.json();
-  if(health.ok!==true||health.name!=='RDZEŃ'||health.protocol!==1||autoJoinCancelled||running||joining)return;
-  document.querySelector('[data-mode="online"]').click();
-  await start();
- }catch{}finally{clearTimeout(timer);}
-}
-autoJoin();
+// Stay in the menu until the player explicitly presses Play.
 
 })();
 </script>

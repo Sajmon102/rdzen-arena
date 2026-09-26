@@ -31,6 +31,9 @@ try {
   process.exit(1);
 }
 
+const ROTATION_MS = 15 * 60 * 1000;
+const rotationEpoch = Date.now();
+function rotationAt(now=Date.now()) {const elapsed=Math.max(0,now-rotationEpoch);return {index:Math.floor(elapsed/ROTATION_MS),remaining:(ROTATION_MS-elapsed%ROTATION_MS)/1000};}
 const rooms = new Map();
 const sessions = new Map();
 const sessionsById = new Map();
@@ -157,7 +160,9 @@ const server = http.createServer(async (req, res) => {
       let room = rooms.get(roomName);
       if (!room) {
         if (rooms.size >= MAX_ROOMS) return json(res, 503, { error: 'Serwer ma już maksymalną liczbę pokoi.' });
-        room = { name: roomName, world: Engine.createWorld({ bots: 6, difficulty: 'normal', seed: crypto.randomInt(1, 2147483647) }), members: new Set() };
+        const rotation=rotationAt();
+        room = { name: roomName, rotationIndex: rotation.index, world: Engine.createWorld({ bots: 6, difficulty: 'normal', gameMode:Engine.gameModes[rotation.index%3], seed: crypto.randomInt(1, 2147483647) }), members: new Set() };
+        room.world.rotationRemaining=rotation.remaining;
         rooms.set(roomName, room);
       }
       if (room.members.size >= MAX_PLAYERS) return json(res, 409, { error: 'Ten pokój jest pełny (12 graczy).' });
@@ -166,7 +171,7 @@ const server = http.createServer(async (req, res) => {
       Engine.join(room.world, { id, name });
       const session = {
         id, token, room, stream: null, deadline: now + RECONNECT_MS,
-        lastInput: now, inputIdle: false,
+        lastInput: now, inputIdle: false, mapRevision:null,
         limits: { input: { time: now, available: 120 }, action: { time: now, available: 16 } },
       };
       room.members.add(id);
@@ -191,6 +196,7 @@ const server = http.createServer(async (req, res) => {
       req.socket.setNoDelay(true);
       res.write('retry: 1500\n\n');
       res.write('event: state\ndata: ' + JSON.stringify(Engine.snapshot(session.room.world)) + '\n\n');
+      session.mapRevision=session.room.world.mapRevision;
       res.on('close', () => {
         if (session.stream === res) {
           session.stream = null;
@@ -251,6 +257,9 @@ const timer = setInterval(() => {
     }
   }
   for (const room of rooms.values()) {
+    const rotation=rotationAt();
+    if(rotation.index!==room.rotationIndex){Engine.setGameMode(room.world,Engine.gameModes[rotation.index%3]);room.rotationIndex=rotation.index;}
+    room.world.rotationRemaining=rotation.remaining;
     Engine.step(room.world, dt);
     const snapshot = Engine.snapshot(room.world);
     delete snapshot.walls; // Static geometry is sent on every initial connection/reconnection.
@@ -266,7 +275,8 @@ const timer = setInterval(() => {
       const stream = session?.stream;
       if (!stream || stream.destroyed || stream.writableEnded) continue;
       if (stream.writableLength > 1024 * 1024) { stream.destroy(); continue; }
-      stream.write(state);
+      if(session.mapRevision!==room.world.mapRevision){stream.write('event: state\ndata: '+JSON.stringify(Engine.snapshot(room.world))+'\n\n');session.mapRevision=room.world.mapRevision;}
+      else stream.write(state);
       if (now - lastPing >= 10000) stream.write(': ping\n\n');
     }
   }
