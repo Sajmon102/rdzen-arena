@@ -22,7 +22,7 @@ try {
   const context = vm.createContext({ console, Math, Date, performance });
   vm.runInContext(match[1], context, { filename: 'arena-engine.js', timeout: 5000 });
   Engine = context.ArenaEngine;
-  for (const method of ['createWorld', 'join', 'remove', 'input', 'step', 'upgrade', 'chooseClass', 'respawn', 'snapshot']) {
+  for (const method of ['createWorld', 'join', 'remove', 'input', 'step', 'upgrade', 'chooseClass', 'respawn', 'snapshot', 'sandboxStats', 'sandboxWalls']) {
     if (typeof Engine?.[method] !== 'function') throw new Error('Brak funkcji silnika: ' + method);
   }
 } catch (error) {
@@ -42,7 +42,7 @@ const idleInput = Object.freeze({ x: 0, y: 0, angle: 0, fire: false, boost: fals
 const MAX_ROOMS = 20;
 const MAX_PLAYERS = 12;
 const RECONNECT_MS = 10000;
-const BODY_LIMIT = 4096;
+const BODY_LIMIT = 65536;
 
 function json(res, status, data) {
   if (res.destroyed || res.writableEnded) return;
@@ -107,6 +107,7 @@ function endSession(session) {
   sessionsById.delete(session.id);
   session.room.members.delete(session.id);
   Engine.remove(session.room.world, session.id);
+  if(session.sandboxBaseline&&session.sandboxBaseline.gameMode===session.room.world.gameMode){session.room.world.walls=session.sandboxBaseline.walls.map(w=>({...w}));session.room.world.mapRevision++;session.room.world.bullets=[];}
   const stream = session.stream;
   session.stream = null;
   if (stream && !stream.writableEnded) stream.end();
@@ -171,7 +172,7 @@ const server = http.createServer(async (req, res) => {
       Engine.join(room.world, { id, name });
       const session = {
         id, token, room, stream: null, deadline: now + RECONNECT_MS,
-        lastInput: now, inputIdle: false, mapRevision:null,
+        lastInput: now, inputIdle: false, mapRevision:null, sandboxBaseline:null,
         limits: { input: { time: now, available: 120 }, action: { time: now, available: 16 } },
       };
       room.members.add(id);
@@ -227,6 +228,19 @@ const server = http.createServer(async (req, res) => {
         Engine.chooseClass(session.room.world, session.id, data.classId);
       } else if (data.type === 'respawn') {
         Engine.respawn(session.room.world, session.id);
+      } else if (data.type === 'sandboxSpectator' && typeof data.enabled === 'boolean') {
+        const player=session.room.world.players.find(item=>item.id===session.id);
+        if(!player)return json(res,404,{error:'Nie znaleziono czołgu.'});
+        player._spectator=data.enabled;
+        if(data.enabled){if(!session.sandboxBaseline)session.sandboxBaseline={gameMode:session.room.world.gameMode,walls:session.room.world.walls.map(w=>({...w}))};Engine.input(session.room.world,session.id,idleInput);player._reload=0;}
+        return json(res,200,{ok:true});
+      } else if (data.type === 'sandboxStats') {
+        const ok=Engine.sandboxStats(session.room.world,session.id,data.reset===true?null:data.values);
+        return json(res,200,{ok});
+      } else if (data.type === 'sandboxWalls') {
+        if(!Array.isArray(data.walls)||data.walls.length>250)return json(res,400,{error:'Mapa może mieć do 250 ścian.'});
+        const ok=Engine.sandboxWalls(session.room.world,data.walls);
+        return json(res,200,{ok});
       } else if (data.type === 'leave') {
         endSession(session);
       } else return json(res, 400, { error: 'Nieznana akcja.' });
