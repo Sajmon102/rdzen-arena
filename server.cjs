@@ -231,7 +231,7 @@ const server = http.createServer(async (req, res) => {
       } else if (data.type === 'sandboxSpectator' && typeof data.enabled === 'boolean') {
         const player=session.room.world.players.find(item=>item.id===session.id);
         if(!player)return json(res,404,{error:'Nie znaleziono czołgu.'});
-        player._spectator=data.enabled;
+        player._spectator=data.enabled;if(!data.enabled)Engine.endSpectator(session.room.world,session.id);
         if(data.enabled){if(!session.sandboxBaseline)session.sandboxBaseline={gameMode:session.room.world.gameMode,walls:session.room.world.walls.map(w=>({...w}))};Engine.input(session.room.world,session.id,idleInput);player._reload=0;}
         return json(res,200,{ok:true});
       } else if (data.type === 'sandboxStats') {
@@ -240,7 +240,7 @@ const server = http.createServer(async (req, res) => {
       } else if (data.type === 'sandboxWalls') {
         if(!Array.isArray(data.walls)||data.walls.length>250)return json(res,400,{error:'Mapa może mieć do 250 ścian.'});
         const ok=Engine.sandboxWalls(session.room.world,data.walls);
-        return json(res,200,{ok});
+        return json(res,200,{ok,walls:ok?session.room.world.walls:undefined});
       } else if (data.type === 'leave') {
         endSession(session);
       } else return json(res, 400, { error: 'Nieznana akcja.' });
