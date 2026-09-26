@@ -155,6 +155,7 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
   for(const [id,name,tier,parent,hp,speed,damage,reload,bulletSpeed,bulletLife,radius,guns,description] of extraClasses)classes.push({id,name,tier,parent,hp,speed,damage,reload,bulletSpeed,bulletLife,radius,barrels:guns.map(g=>barrel(...g)),description,bulletRadius:id==='destroyer'?12:5});
   const gameModes=['ffa','maze','grow'];
   const modeNames={ffa:'FFA',maze:'Labirynt',grow:'Grow'};
+  function shieldRadius(player){return Math.max(8,(player.radius||config.playerRadius)*1.22+3);}
   function sizeScale(level,mode){const base=.55+.45*Math.min(44,Math.max(0,level-1))/44;return base+(mode==='grow'&&level>45?.18*Math.log2(1+(level-45)/15):0);}
   function mazeWalls(w){
     // A spanning tree guarantees connected corridors. Cell centres remain unobstructed.
@@ -165,7 +166,7 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
       if(!neighbours.length){stack.pop();continue;}const b=neighbours[Math.floor(random(w)*neighbours.length)];seen.add(b);edges.add(edge(a,b));stack.push(b);
     }
     const walls=[];
-    for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const a=y*cols+x;if(x<cols-1&&!edges.has(edge(a,a+1)))walls.push({x:ox+(x+1)*cw-22,y:oy+y*ch-22,w:44,h:ch+44});if(y<rows-1&&!edges.has(edge(a,a+cols)))walls.push({x:ox+x*cw-22,y:oy+(y+1)*ch-22,w:cw+44,h:44});}
+    for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const a=y*cols+x;if(x<cols-1&&!edges.has(edge(a,a+1)))walls.push({x:ox+(x+1)*cw-64,y:oy+y*ch-64,w:128,h:ch+128});if(y<rows-1&&!edges.has(edge(a,a+cols)))walls.push({x:ox+x*cw-64,y:oy+(y+1)*ch-64,w:cw+128,h:128});}
     return walls;
   }
   const standardWalls=[
@@ -175,7 +176,12 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
       {x:430,y:3180,w:180,h:180},{x:1120,y:2860,w:200,h:200},{x:1780,y:3320,w:170,h:170},{x:2520,y:2980,w:210,h:210},{x:3260,y:3420,w:180,h:180},{x:4010,y:2940,w:200,h:200},{x:4720,y:3370,w:170,h:170},{x:5450,y:3010,w:210,h:210},
       {x:920,y:3880,w:170,h:170},{x:2230,y:3820,w:200,h:200},{x:3690,y:3890,w:180,h:180},{x:4970,y:3820,w:200,h:200}
     ];
-  function configureMap(w,mode){w.gameMode=gameModes.includes(mode)?mode:'ffa';w.mapRevision=(w.mapRevision||0)+1;w.walls=w.gameMode==='maze'?mazeWalls(w):standardWalls.map(b=>({...b}));
+  const ffaLinks=[
+    {x:1980,y:630,w:80,h:600},{x:1870,y:1190,w:110,h:80},
+    {x:3560,y:660,w:80,h:460},{x:3440,y:1080,w:120,h:80},
+    {x:4340,y:890,w:80,h:600},{x:4140,y:1490,w:200,h:80}
+  ];
+  function configureMap(w,mode){w.gameMode=gameModes.includes(mode)?mode:'ffa';w.mapRevision=(w.mapRevision||0)+1;w.walls=w.gameMode==='maze'?mazeWalls(w):standardWalls.concat(ffaLinks).map(b=>({...b}));
     // Place relay zones inside open corridors so every mode remains playable.
     w.relays.forEach((r,i)=>{const cells=[[1,2],[6,1],[10,3],[9,6],[3,6]],c=cells[i];r.x=240+(c[0]+.5)*460;r.y=280+(c[1]+.5)*480;});
   }
@@ -243,12 +249,36 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
     }
   }
   shapeTypes.crasher={name:'Crasher',sides:3,radius:19,hp:95,color:'#ed78b8',value:180,rings:0,hostile:true};
-  function rollNormalShape(roll,mode='ffa'){
-    // FFA follows the supplied per-attempt chances. Maze redistributes weights towards rare tiers.
-    const weighted=mode==='maze',weights=normalShapeChances.map(([type,chance])=>[type,chance*(weighted?[1,2,4,6][shapeTypes[type].rings]:1)]);
-    const total=weighted?weights.reduce((sum,[,v])=>sum+v,0):1;let threshold=0;
-    for(const [type,chance] of weights){threshold+=chance/total;if(roll<threshold)return type;}return null;
+  // Shiny stats and absolute chances transcribed from the supplied Rare Shapes PDF.
+  // The PDF lists Omega spawn chances only for Labyrinth; FFA/Grow Omega stays disabled.
+  const shinyDenominators={
+    egg:{ffa:[150000,500000,1666667,null],maze:[150,500,1667,5556]},
+    square:{ffa:[300000,1000000,3333333,null],maze:[300,1000,3333,11111]},
+    triangle:{ffa:[600000,2000000,6666667,null],maze:[600,2000,6667,22222]},
+    pentagon:{ffa:[1200000,4000000,13333333,null],maze:[1200,4000,13333,44444]},
+    hexagon:{ffa:[2400000,8000000,26666667,null],maze:[2400,8000,26667,88889]}
+  };
+  const shinyStats={
+    egg:{hp:[.4,2,10,40],xp:[500,2500,12500,100000]},
+    square:{hp:[2,10,50,200],xp:[2000,10000,50000,400000]},
+    triangle:{hp:[20,100,500,2000],xp:[10000,50000,250000,2000000]},
+    pentagon:{hp:[150,750,3750,15000],xp:[50000,250000,1250000,10000000]},
+    hexagon:{hp:[400,2000,10000,40000],xp:[250000,1250000,6250000,50000000]}
+  };
+  for(const [type] of normalShapeChances){
+    const base=shapeTypes[type],stats=shinyStats[type.split('_')[0]],tier=base.rings;
+    shapeTypes['shiny_'+type]={...base,name:'Shiny '+base.name,color:'#b9e87a',hp:stats.hp[tier],value:stats.xp[tier],shiny:true};
   }
+  const spawnTables={};
+  for(const mode of ['ffa','maze']){
+    const weighted=normalShapeChances.map(([type,chance])=>[type,chance*(mode==='maze'?[1,2,4,6][shapeTypes[type].rings]:1)]);
+    const total=mode==='maze'?weighted.reduce((sum,[,v])=>sum+v,0):1;
+    spawnTables[mode]=weighted.flatMap(([type,weight])=>{
+      const family=type.split('_')[0],tier=shapeTypes[type].rings,den=shinyDenominators[family][mode][tier],rare=den?1/den:0;
+      return [{type:'shiny_'+type,chance:rare,denominator:den},{type,chance:weight/total-rare}];
+    });
+  }
+  function rollNormalShape(roll,mode='ffa'){let threshold=0;for(const entry of spawnTables[mode==='maze'?'maze':'ffa']){threshold+=entry.chance;if(roll<threshold)return entry.type;}return null;}
   function makeShape(w,existing) {
     const inNest=existing?existing._nest:w.shapes.length<58,roll=random(w);
     let type=rollNormalShape(roll,w.gameMode);
@@ -258,7 +288,7 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
       const pending=existing||{id:uid(w,'s'),x:0,y:0,radius:0,hp:0,maxHp:0,_nest:false};
       pending._dead=true;pending._respawn=1;return pending;
     }
-    const kind=shapeTypes[type],shiny=!kind.hostile&&random(w)<(w.gameMode==='maze'?.009:.003);
+    const kind=shapeTypes[type],shiny=!!kind.shiny;
     let pos=null;
     for(let tries=0;tries<350;tries++){
       const a=random(w)*Math.PI*2,r=Math.sqrt(random(w))*(nest.radius-kind.radius);
@@ -271,8 +301,8 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
     }
     // Keep a dead slot pending instead of spawning inside a wall or another entity.
     if(!pos){if(existing){existing._respawn=1;return existing;}return null;}
-    const hp=kind.hp*(shiny?3:1),s=existing||{};
-    Object.assign(s,{id:existing?existing.id:uid(w,'s'),type,name:(shiny?'Shiny ':'')+kind.name,x:pos.x,y:pos.y,radius:kind.radius,sides:kind.sides,hp,maxHp:hp,color:shiny?'#83f58b':kind.color,value:kind.value*(shiny?5:1),rings:kind.rings,hostile:!!kind.hostile,shiny,angle:random(w)*Math.PI*2,_nest:inNest,_dead:false,_respawn:0});return s;
+    const hp=kind.hp,s=existing||{};
+    Object.assign(s,{id:existing?existing.id:uid(w,'s'),type,name:kind.name,x:pos.x,y:pos.y,radius:kind.radius,sides:kind.sides,hp,maxHp:hp,color:kind.color,value:kind.value,rings:kind.rings,hostile:!!kind.hostile,shiny,angle:random(w)*Math.PI*2,_nest:inNest,_dead:false,_respawn:0});return s;
   }
   function createWorld(options={}) {
     const difficulty=['easy','normal','hard'].includes(options.difficulty)?options.difficulty:'hard';
@@ -414,7 +444,7 @@ body.performance .panel,body.performance .modal-wrap{backdrop-filter:none}body.p
   function snapshot(w) {
     return {gameMode:w.gameMode,mapRevision:w.mapRevision,rotationRemaining:w.rotationRemaining??null,time:w.time,relaySwitchIn:w.relaySwitchIn,players:w.players.map(p=>({id:p.id,name:p.name,x:p.x,y:p.y,angle:p.angle,hp:p.hp,maxHp:p.maxHp,level:p.level,xp:p.xp,nextXp:p.nextXp,score:p.score,respawnScore:p.respawnScore||0,kills:p.kills,deaths:p.deaths,points:p.points,classId:p.classId,stats:copyStats(p.stats),color:p.color,bot:p.bot,dead:p.dead,respawnIn:p.respawnIn,shield:p.shield,boostTime:p.boostTime,boostCharge:p.boostCharge,dashCooldown:p.dashCooldown,relayProgress:p.relayProgress,radius:p.radius})),bullets:w.bullets.map(b=>({id:b.id,ownerId:b.ownerId,x:b.x,y:b.y,vx:b.vx,vy:b.vy,radius:b.radius,color:b.color,life:b.life,pierce:b.pierce})),shapes:w.shapes.filter(s=>!s._dead).map(s=>({id:s.id,x:s.x,y:s.y,radius:s.radius,sides:s.sides,type:s.type,name:s.name,rings:s.rings,hostile:s.hostile,shiny:s.shiny,hp:s.hp,maxHp:s.maxHp,color:s.color,value:s.value,angle:s.angle})),walls:w.walls.map(b=>({...b})),relays:w.relays.map(r=>({...r})),events:w.events.map(e=>({...e}))};
   }
-  root.ArenaEngine={config,classes,stats,nest,gameModes,modeNames,sizeScale,setGameMode,shapeTypes,normalShapeChances,rollNormalShape,createWorld,join,remove,input,step,upgrade,chooseClass,respawn,snapshot};
+  root.ArenaEngine={config,classes,stats,nest,gameModes,modeNames,sizeScale,shieldRadius,setGameMode,shapeTypes,normalShapeChances,spawnTables,shinyDenominators,rollNormalShape,createWorld,join,remove,input,step,upgrade,chooseClass,respawn,snapshot};
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 </script>
@@ -541,7 +571,7 @@ function drawViewport(vx,vy,vw,vh,camera,p){ctx.save();ctx.beginPath();ctx.rect(
  for(const wall of world.walls){if(!visible(wall.x+wall.w/2,wall.y+wall.h/2,Math.max(wall.w,wall.h)))continue;ctx.fillStyle='#07162085';rounded(wall.x+5,wall.y+7,wall.w,wall.h,7);ctx.fill();ctx.fillStyle='#273b46';ctx.strokeStyle='#4a626d';ctx.lineWidth=2;rounded(wall.x,wall.y,wall.w,wall.h,5);ctx.fill();ctx.stroke();ctx.strokeStyle='#607a842e';ctx.beginPath();ctx.moveTo(wall.x+8,wall.y+8);ctx.lineTo(wall.x+wall.w-8,wall.y+8);ctx.stroke();}
  for(const s of world.shapes){if(!visible(s.x,s.y,(s.radius||65)+30)||s.hp<=0)continue;const radius=s.radius||18,sides=s.sides??4,angle=s.angle||0;if(!performanceMode){polygon(s.x+4,s.y+6,radius,sides,angle);ctx.fillStyle='#06101a55';ctx.fill();}polygon(s.x,s.y,radius,sides,angle);ctx.fillStyle=s.color||'#f5cf55';ctx.strokeStyle='#59646b';ctx.lineWidth=3;ctx.fill();ctx.stroke();const rings=s.rings||0;ctx.strokeStyle='#35434caa';ctx.lineWidth=2;for(let ring=1;ring<=rings;ring++){polygon(s.x,s.y,radius*(1-ring*.2),sides,angle+(sides?ring*Math.PI/sides:0));ctx.stroke();}if(rings){const inner=radius*(1-rings*.2);ctx.beginPath();for(let i=0;i<sides;i++){const a=angle+i*Math.PI*2/sides;ctx.moveTo(s.x+Math.cos(a)*radius*.94,s.y+Math.sin(a)*radius*.94);ctx.lineTo(s.x+Math.cos(a)*inner,s.y+Math.sin(a)*inner);}ctx.stroke();}if(s.name&&(!performanceMode||s.shiny||s.hp<s.maxHp)&&(s.rings||s.shiny||s.hp<s.maxHp)){ctx.font='600 12px Segoe UI';ctx.textAlign='center';ctx.fillStyle=s.shiny?'#83f58b':'#c8d0ff';ctx.fillText(s.name+' · '+fmt(s.value)+' XP',s.x,s.y-radius-13);}if(s.hp<s.maxHp){ctx.fillStyle='#0d1722';ctx.fillRect(s.x-radius,s.y+radius+9,radius*2,4);ctx.fillStyle=s.color;ctx.fillRect(s.x-radius,s.y+radius+9,radius*2*Math.max(0,s.hp/s.maxHp),4);}}
  for(const b of world.bullets){const age=mode==='online'?Math.min(.06,(performance.now()-lastNetUpdate)/1000):0,bx=b.x+(b.vx||0)*age,by=b.y+(b.vy||0)*age;if(!visible(bx,by,30))continue;const color=b.color||'#a2f5d7';const angle=b.angle??Math.atan2(b.vy||0,b.vx||1);ctx.strokeStyle=color+'60';ctx.lineWidth=(b.radius||5)*1.4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(bx-Math.cos(angle)*15,by-Math.sin(angle)*15);ctx.lineTo(bx,by);ctx.stroke();ctx.beginPath();ctx.arc(bx,by,b.radius||5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#112934';ctx.lineWidth=1.5;ctx.stroke();}ctx.lineCap='butt';
- for(const source of world.players){const v=visualPlayers.get(source.id),t=v?{...source,x:v.x,y:v.y,angle:v.angle}:source;if(t.dead||!visible(t.x,t.y,Math.max(85,t.radius*3)))continue;tank(ctx,t);if(t.shield>0){ctx.beginPath();ctx.arc(t.x,t.y,37+Math.sin(renderClock*5)*2,0,Math.PI*2);ctx.strokeStyle='#b7dfff88';ctx.lineWidth=2;ctx.stroke();}ctx.textAlign='center';ctx.font='600 12px Segoe UI';ctx.fillStyle=t.id===myId?'#e6fff7':'#cad9df';ctx.fillText(t.name+(t.bot?' · BOT':''),t.x,t.y-t.radius-21);ctx.fillStyle='#091a23';rounded(t.x-25,t.y+t.radius+14,50,6,3);ctx.fill();ctx.fillStyle='#83d85d';rounded(t.x-24,t.y+t.radius+15,48*clamp(t.hp/t.maxHp,0,1),4,2);ctx.fill();if(t.id===p?.id){ctx.strokeStyle='#d9ffee80';ctx.lineWidth=1;ctx.beginPath();ctx.arc(t.x,t.y,t.radius+9,t.angle-.35,t.angle+.35);ctx.stroke();}}
+ for(const source of world.players){const v=visualPlayers.get(source.id),t=v?{...source,x:v.x,y:v.y,angle:v.angle}:source;if(t.dead||!visible(t.x,t.y,Math.max(85,t.radius*3)))continue;tank(ctx,t);if(t.shield>0){ctx.beginPath();const shield=E.shieldRadius(t);ctx.arc(t.x,t.y,shield+Math.sin(renderClock*5)*Math.min(1.5,shield*.05),0,Math.PI*2);ctx.strokeStyle='#b7dfff88';ctx.lineWidth=Math.max(1.2,Math.min(2.5,t.radius*.07));ctx.stroke();}ctx.textAlign='center';ctx.font='600 12px Segoe UI';ctx.fillStyle=t.id===myId?'#e6fff7':'#cad9df';ctx.fillText(t.name+(t.bot?' · BOT':''),t.x,t.y-t.radius-21);ctx.fillStyle='#091a23';rounded(t.x-25,t.y+t.radius+14,50,6,3);ctx.fill();ctx.fillStyle='#83d85d';rounded(t.x-24,t.y+t.radius+15,48*clamp(t.hp/t.maxHp,0,1),4,2);ctx.fill();if(t.id===p?.id){ctx.strokeStyle='#d9ffee80';ctx.lineWidth=1;ctx.beginPath();ctx.arc(t.x,t.y,t.radius+9,t.angle-.35,t.angle+.35);ctx.stroke();}}
  for(const particle of particles){if(!visible(particle.x,particle.y,10))continue;ctx.globalAlpha=clamp(particle.life/particle.max,0,1);ctx.fillStyle=particle.color;ctx.fillRect(particle.x,particle.y,particle.size,particle.size);}ctx.globalAlpha=1;
  for(const t of floatTexts){ctx.globalAlpha=clamp(t.life,0,1);ctx.fillStyle=t.color;ctx.font='700 15px Segoe UI';ctx.textAlign='center';ctx.fillText(t.text,t.x,t.y);}ctx.globalAlpha=1;
  // Direction marker points to the active relay beyond the viewport.
@@ -577,7 +607,7 @@ function tick(now){if(now-last<1000/(running?60:30)-.5){requestAnimationFrame(ti
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);if(running&&mode==='local'){drawViewport(0,0,w/2,h,cam1,me);drawViewport(w/2,0,w/2,h,cam2,p2);ctx.fillStyle='#0c1825';ctx.fillRect(w/2-2,0,4,h);}else drawViewport(0,0,w,h,cam1,me);
  if(hudClock>=.12){hudClock=0;updateHud();}requestAnimationFrame(tick);}
 // A small read-only inspection hook helps verify that the downloadable game is running.
-globalThis.RdzenArena={getState:()=>({running,mode,difficulty,paused,world:E.snapshot(world),myId,p2Id}),getPerformance:()=>({enabled:performanceMode,pixelRatio:dpr}),version:'3.0'};
+globalThis.RdzenArena={getState:()=>({running,mode,difficulty,paused,world:E.snapshot(world),myId,p2Id}),getPerformance:()=>({enabled:performanceMode,pixelRatio:dpr}),version:'3.1'};
 addEventListener('pagehide',disconnect);requestAnimationFrame(tick);
 // Stay in the menu until the player explicitly presses Play.
 
