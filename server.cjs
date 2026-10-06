@@ -22,7 +22,7 @@ try {
   const context = vm.createContext({ console, Math, Date, performance });
   vm.runInContext(match[1], context, { filename: 'arena-engine.js', timeout: 5000 });
   Engine = context.ArenaEngine;
-  for (const method of ['createWorld', 'join', 'remove', 'input', 'step', 'upgrade', 'chooseClass', 'respawn', 'snapshot', 'sandboxStats', 'sandboxWalls', 'sandboxMove']) {
+  for (const method of ['createWorld', 'join', 'remove', 'input', 'step', 'upgrade', 'chooseClass', 'respawn', 'snapshot']) {
     if (typeof Engine?.[method] !== 'function') throw new Error('Brak funkcji silnika: ' + method);
   }
 } catch (error) {
@@ -31,18 +31,14 @@ try {
   process.exit(1);
 }
 
-const ROTATION_MS = 15 * 60 * 1000;
-const rotationEpoch = Date.now();
-function rotationAt(now=Date.now()) {const elapsed=Math.max(0,now-rotationEpoch);return {index:Math.floor(elapsed/ROTATION_MS),remaining:(ROTATION_MS-elapsed%ROTATION_MS)/1000};}
 const rooms = new Map();
 const sessions = new Map();
-const sessionsById = new Map();
 const joinLimits = new Map();
 const idleInput = Object.freeze({ x: 0, y: 0, angle: 0, fire: false, boost: false, dash: false });
 const MAX_ROOMS = 20;
 const MAX_PLAYERS = 12;
 const RECONNECT_MS = 10000;
-const BODY_LIMIT = 65536;
+const BODY_LIMIT = 4096;
 
 function json(res, status, data) {
   if (res.destroyed || res.writableEnded) return;
@@ -104,10 +100,8 @@ function allowSession(session, kind, now) {
 
 function endSession(session) {
   if (!sessions.delete(session.token)) return;
-  sessionsById.delete(session.id);
   session.room.members.delete(session.id);
   Engine.remove(session.room.world, session.id);
-  if(session.sandboxBaseline&&session.sandboxBaseline.gameMode===session.room.world.gameMode){session.room.world.walls=session.sandboxBaseline.walls.map(w=>({...w}));session.room.world.mapRevision++;session.room.world.bullets=[];}
   const stream = session.stream;
   session.stream = null;
   if (stream && !stream.writableEnded) stream.end();
@@ -161,9 +155,7 @@ const server = http.createServer(async (req, res) => {
       let room = rooms.get(roomName);
       if (!room) {
         if (rooms.size >= MAX_ROOMS) return json(res, 503, { error: 'Serwer ma już maksymalną liczbę pokoi.' });
-        const rotation=rotationAt();
-        room = { name: roomName, rotationIndex: rotation.index, world: Engine.createWorld({ bots: 6, difficulty: 'normal', gameMode:Engine.gameModes[rotation.index%3], seed: crypto.randomInt(1, 2147483647) }), members: new Set() };
-        room.world.rotationRemaining=rotation.remaining;
+        room = { name: roomName, world: Engine.createWorld({ bots: 6, difficulty: 'normal', seed: crypto.randomInt(1, 2147483647) }), members: new Set() };
         rooms.set(roomName, room);
       }
       if (room.members.size >= MAX_PLAYERS) return json(res, 409, { error: 'Ten pokój jest pełny (12 graczy).' });
@@ -172,12 +164,11 @@ const server = http.createServer(async (req, res) => {
       Engine.join(room.world, { id, name });
       const session = {
         id, token, room, stream: null, deadline: now + RECONNECT_MS,
-        lastInput: now, inputIdle: false, mapRevision:null, sandboxBaseline:null,
+        lastInput: now, inputIdle: false,
         limits: { input: { time: now, available: 120 }, action: { time: now, available: 16 } },
       };
       room.members.add(id);
       sessions.set(token, session);
-      sessionsById.set(id, session);
       return json(res, 200, { id, token, room: roomName });
     }
     if (req.method === 'GET' && url.pathname === '/events') {
@@ -197,7 +188,6 @@ const server = http.createServer(async (req, res) => {
       req.socket.setNoDelay(true);
       res.write('retry: 1500\n\n');
       res.write('event: state\ndata: ' + JSON.stringify(Engine.snapshot(session.room.world)) + '\n\n');
-      session.mapRevision=session.room.world.mapRevision;
       res.on('close', () => {
         if (session.stream === res) {
           session.stream = null;
@@ -221,29 +211,11 @@ const server = http.createServer(async (req, res) => {
         session.lastInput = performance.now();
         session.inputIdle = false;
       } else if (data.type === 'upgrade' && typeof data.stat === 'string' && data.stat.length < 40) {
-        if (data.target !== undefined && (!Number.isInteger(data.target) || data.target < 1 || data.target > Engine.config.statCap)) return json(res, 400, { error: 'Nieprawidłowy poziom ulepszenia.' });
-        const upgraded = Engine.upgrade(session.room.world, session.id, data.stat, data.target);
-        return json(res, 200, { ok: upgraded });
+        Engine.upgrade(session.room.world, session.id, data.stat);
       } else if (data.type === 'class' && typeof data.classId === 'string' && data.classId.length < 40) {
         Engine.chooseClass(session.room.world, session.id, data.classId);
       } else if (data.type === 'respawn') {
         Engine.respawn(session.room.world, session.id);
-      } else if (data.type === 'sandboxSpectator' && typeof data.enabled === 'boolean') {
-        const player=session.room.world.players.find(item=>item.id===session.id);
-        if(!player)return json(res,404,{error:'Nie znaleziono czołgu.'});
-        player._spectator=data.enabled;if(!data.enabled)Engine.endSpectator(session.room.world,session.id);
-        if(data.enabled){if(!session.sandboxBaseline)session.sandboxBaseline={gameMode:session.room.world.gameMode,walls:session.room.world.walls.map(w=>({...w}))};Engine.input(session.room.world,session.id,idleInput);player._reload=0;}
-        return json(res,200,{ok:true});
-      } else if (data.type === 'sandboxMove') {
-        const ok=Engine.sandboxMove(session.room.world,session.id,data.x,data.y);
-        return json(res,ok?200:409,{ok});
-      } else if (data.type === 'sandboxStats') {
-        const ok=Engine.sandboxStats(session.room.world,session.id,data.reset===true?null:data.values);
-        return json(res,200,{ok});
-      } else if (data.type === 'sandboxWalls') {
-        if(!Array.isArray(data.walls)||data.walls.length>250)return json(res,400,{error:'Mapa może mieć do 250 ścian.'});
-        const ok=Engine.sandboxWalls(session.room.world,data.walls);
-        return json(res,200,{ok,walls:ok?session.room.world.walls:undefined});
       } else if (data.type === 'leave') {
         endSession(session);
       } else return json(res, 400, { error: 'Nieznana akcja.' });
@@ -274,26 +246,15 @@ const timer = setInterval(() => {
     }
   }
   for (const room of rooms.values()) {
-    const rotation=rotationAt();
-    if(rotation.index!==room.rotationIndex){Engine.setGameMode(room.world,Engine.gameModes[rotation.index%3]);room.rotationIndex=rotation.index;}
-    room.world.rotationRemaining=rotation.remaining;
     Engine.step(room.world, dt);
-    const snapshot = Engine.snapshot(room.world);
-    delete snapshot.walls; // Static geometry is sent on every initial connection/reconnection.
-    const state = 'event: state\ndata: ' + JSON.stringify(snapshot, (key, value) => {
-      if (typeof value !== 'number') return value;
-      if (['x','y','vx','vy'].includes(key)) return Math.round(value * 10) / 10;
-      if (['angle','time','life'].includes(key)) return Math.round(value * 1000) / 1000;
-      return value; // Never round health, XP or damage.
-    }) + '\n\n';
+    const state = 'event: state\ndata: ' + JSON.stringify(Engine.snapshot(room.world)) + '\n\n';
     for (const id of room.members) {
       // Room size is capped; room membership never contains client credentials.
-      const session = sessionsById.get(id);
+      const session = [...sessions.values()].find(item => item.id === id);
       const stream = session?.stream;
       if (!stream || stream.destroyed || stream.writableEnded) continue;
       if (stream.writableLength > 1024 * 1024) { stream.destroy(); continue; }
-      if(session.mapRevision!==room.world.mapRevision){stream.write('event: state\ndata: '+JSON.stringify(Engine.snapshot(room.world))+'\n\n');session.mapRevision=room.world.mapRevision;}
-      else stream.write(state);
+      stream.write(state);
       if (now - lastPing >= 10000) stream.write(': ping\n\n');
     }
   }
@@ -311,9 +272,7 @@ server.on('error', error => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log('\nRDZEŃ — serwer multiplayer działa.');
   console.log(`Na tym komputerze: http://localhost:${PORT}`);
-  let localInterfaces = {};
-  try { localInterfaces = os.networkInterfaces(); } catch { /* Some hosts do not expose LAN addresses. */ }
-  for (const interfaces of Object.values(localInterfaces)) {
+  for (const interfaces of Object.values(os.networkInterfaces())) {
     for (const network of interfaces || []) {
       if (network.family === 'IPv4' && !network.internal) console.log(`W tej samej sieci: http://${network.address}:${PORT}`);
     }
